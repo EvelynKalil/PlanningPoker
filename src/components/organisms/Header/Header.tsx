@@ -1,12 +1,16 @@
 import React from 'react'
 import './Header.css'
-import logo from '../../../assets/Logo.png' // o logo.png si es PNG
+import logo from '../../../assets/logo.png'
 
-const Header = () => {
+type HeaderProps = {
+  showTitle?: boolean
+}
+
+const Header = ({ showTitle = true }: HeaderProps) => {
   return (
     <header className="header">
       <img src={logo} alt="Logo" className="logo" />
-      <h1 className="title">Crear partida</h1>
+      {showTitle && <h1 className="title">Crear partida</h1>}
     </header>
   )
 }

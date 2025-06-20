@@ -1,0 +1,128 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-player {
+  background-color: #1a063a;
+  border: 2px solid #a678f2;
+  border-radius: 30px;
+  padding: 32px 40px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 0 20px rgba(185, 104, 255, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: white;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: -8px;
+  width: 80%;
+  align-self: center;
+}
+
+.modal-player input[type="text"] {
+  background: transparent;
+  border: 2px solid #a678f2;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  outline: none;
+  transition: border-color 0.3s ease;
+  width: 70%;
+  align-self: center;
+}
+
+.modal-player input[type="text"].invalid {
+  border-color: #ff4d6d;
+}
+
+.error-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  color: #ff4d6d;
+  font-size: 12px;
+  text-align: left;
+}
+
+.role-group {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 8px;
+}
+
+.role-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.role-group input[type="radio"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #a678f2;
+  border-radius: 50%;
+  position: relative;
+  background: transparent;
+}
+
+.role-group input[type="radio"]:checked::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  background-color: #a678f2;
+  border-radius: 50%;
+}
+
+button[type="submit"] {
+  width: 40%;
+  margin-top: 12px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: #330072;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  align-self: center;
+}
+
+
+button[type="submit"]:disabled {
+  background-color: #45385c;
+  cursor: not-allowed;
+}
+
+.error-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  color: #ff4d6d;
+  font-size: 12px;
+  text-align: left;
+  width: 70%; /* igual al input */
+  align-self: center; /* centrado en el form */
+  margin-top: -8px; /* opcional: reduce espacio si queda muy separado */
+}

@@ -3,16 +3,18 @@ import './Button.css'
 
 type ButtonProps = {
   label: string
-  onClick: () => void
+  onClick?: () => void 
   disabled?: boolean
+  type?: "button" | "submit" | "reset"
 }
 
-const Button = ({ label, onClick, disabled = false }: ButtonProps) => {
+const Button = ({ label, onClick, disabled = false, type = "button" }: ButtonProps) => {
   return (
     <button
       className="button"
       onClick={onClick}
       disabled={disabled}
+      type={type}
     >
       {label}
     </button>

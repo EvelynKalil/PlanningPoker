@@ -1,24 +1,22 @@
 .header {
-  position: absolute;
-  top: 30px;
-  left: 30px;
   display: flex;
   align-items: center;
-  gap: 0px;
+  justify-content: flex-start;
+  padding: 12px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
 }
 
 .logo {
-margin: 0;
-  width: 60px;           
-  height: 60px;          
-  object-fit: contain; 
-  display: block;
+  width: 60px;
+  height: auto;
+  margin: 0;         /* ❗ Elimina padding o margin que lo desplace */
 }
 
-
 .title {
-  font-size: 18px;
+  margin-left: 12px;
+  font-size: 1.3rem;
   color: white;
-  font-weight: 600;
-  margin: 0;
 }

@@ -1,12 +1,15 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react'
 import InputText from '../../atoms/InputText/InputText'
 import Button from '../../atoms/Button/Button'
+import { useNavigate } from 'react-router-dom'
 import './FormCreateGame.css'
+import Header from '../../organisms/Header/Header'
 
 const FormCreateGame = () => {
   const [name, setName] = useState<string>('')
   const [isValid, setIsValid] = useState<boolean>(false)
   const [errors, setErrors] = useState<string[]>([])
+  const navigate = useNavigate()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value
@@ -42,7 +45,7 @@ const FormCreateGame = () => {
     e.preventDefault()
     if (isValid) {
       localStorage.setItem('nombrePartida', name)
-      alert(`Partida "${name}" creada!`)
+      navigate('/sala')
     }
   }
 
@@ -52,7 +55,6 @@ const FormCreateGame = () => {
       <InputText
         value={name}
         onChange={handleChange}
-        //placeholder=""
         isInvalid={errors.length > 0}
       />
       {errors.length > 0 && (
@@ -65,7 +67,8 @@ const FormCreateGame = () => {
       <div className="button-wrapper">
         <Button
           label="Crear partida"
-          onClick={() => {}}
+          type="submit"
+          onClick={() => { }}
           disabled={!isValid}
         />
       </div>
