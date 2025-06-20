@@ -22,7 +22,6 @@ src/
 │   ├── templates/
 │   └── pages/
 ├── assets/
-├── styles/
 ├── main.jsx
 └── index.css
 ```
