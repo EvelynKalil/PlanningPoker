@@ -1,7 +1,13 @@
 import React from 'react'
 import './Button.css'
 
-const Button = ({ label, onClick, disabled }) => {
+type ButtonProps = {
+  label: string
+  onClick: () => void
+  disabled?: boolean
+}
+
+const Button = ({ label, onClick, disabled = false }: ButtonProps) => {
   return (
     <button
       className="button"
