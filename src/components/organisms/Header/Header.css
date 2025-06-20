@@ -1,0 +1,24 @@
+.header {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 0px;
+}
+
+.logo {
+margin: 0;
+  width: 60px;           
+  height: 60px;          
+  object-fit: contain; 
+  display: block;
+}
+
+
+.title {
+  font-size: 18px;
+  color: white;
+  font-weight: 600;
+  margin: 0;
+}

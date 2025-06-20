@@ -1,0 +1,31 @@
+.form-create-game {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 350px;
+  margin: auto;
+  margin-top: 100px;
+  
+}
+
+.form-create-game label {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: -13px;
+}
+
+.error-message {
+  color: #ff4b5c;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}

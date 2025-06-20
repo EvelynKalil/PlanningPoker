@@ -1,0 +1,24 @@
+.input-text {
+  width: 100%;
+  max-width: 300px;
+  padding: 13px 20px;
+  border: 2px solid #964dd5;
+  border-radius: 30px;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 transparent;
+}
+
+.input-text:focus,
+.input-text:hover {
+  box-shadow: 0 0 8px 2px #bb86fc;
+}
+
+.input-text.invalid {
+  border-color: #ff4b5c;
+  box-shadow: 0 0 6px 2px #ff4b5c;
+}
+

@@ -1,0 +1,27 @@
+.button {
+  font-family: 'Poppins', sans-serif;
+  width: 200px;
+  height: 40px;
+  margin-top: 15px;
+  background-color: #ffffff;
+  color: #3a0ca3;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 transparent;
+}
+
+.button:hover {
+  box-shadow: 0 0 8px 2px #bb86fc;
+}
+
+.button:disabled {
+  background-color: #999;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.4;
+}

@@ -1,0 +1,17 @@
+:root {
+  --bg-color: radial-gradient(ellipse at center, #351385 0%, #2b0452 100%);
+  --text-color: white;
+  --accent-color: #bb86fc;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
