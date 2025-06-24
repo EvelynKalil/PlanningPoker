@@ -45,7 +45,8 @@ const FormCreateGame = () => {
     e.preventDefault()
     if (isValid) {
       localStorage.setItem('nombrePartida', name)
-      navigate('/sala')
+      localStorage.setItem('esAdmin', 'true')
+      navigate(`/sala/${name}`)
     }
   }
 

@@ -1,3 +1,4 @@
+// src/components/pages/App.tsx
 import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import FormCreateGame from '../molecules/FormCreateGame/FormCreateGame'
@@ -15,7 +16,9 @@ const App = () => {
       <main className="app-container">
         <Routes>
           <Route path="/" element={<FormCreateGame />} />
-          <Route path="/sala" element={<SalaPage />} />
+          <Route path="/sala/:roomName" element={<SalaPage />} />
+          {/* Bonus: página por defecto si no hay coincidencia */}
+          <Route path="*" element={<p style={{ color: 'white', textAlign: 'center' }}>404 - Página no encontrada</p>} />
         </Routes>
       </main>
     </>
