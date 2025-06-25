@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react'
 import './GameTable.css'
 import Button from '../../atoms/Button/Button'
 
-interface Player {
+export interface Player {
   name: string
+  role: 'player' | 'spectator' | 'admin-player' | 'admin-spectator'
   selectedCard: number | string | null
+  isNew?: boolean
 }
+
 
 interface GameTableProps {
   currentPlayer: Player
@@ -47,36 +50,38 @@ const GameTable: React.FC<GameTableProps> = ({
     return () => window.removeEventListener('storage', syncReveal)
   }, [])
 
-  const handleReveal = () => {
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      setRevealed(true)
-      localStorage.setItem('revealed', 'true')
-      onReveal?.()
-    }, 2000)
-  }
+const handleReveal = () => {
+  setLoading(true);
+  setTimeout(() => {
+    setLoading(false);
+    localStorage.setItem('revealed', 'true');
+    setRevealed(true); // Actualiza el estado local
+    window.dispatchEvent(new Event('playersUpdated'));
+    onReveal?.();
+  }, 2000);
+};
+
 
   const handleNewVote = () => {
-    setRevealed(false);
-    localStorage.setItem('revealed', 'false');
+  setRevealed(false);
+  localStorage.setItem('revealed', 'false');
 
-    const roomName = localStorage.getItem('salaActual') || 'default';
-    const raw = localStorage.getItem(`room:${roomName}:players`);
-    if (raw) {
-      const players = JSON.parse(raw);
-      const updated = players.map((p: Player) => ({
-        ...p,
-        selectedCard: null,
-      }));
-      localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
-    }
+  const roomName = localStorage.getItem('salaActual') || 'default';
+  const raw = localStorage.getItem(`room:${roomName}:players`);
+  if (raw) {
+    const players = JSON.parse(raw);
+    const updated = players.map((p: Player) => ({
+      ...p,
+      selectedCard: null,
+      isNew: false, // 👈 limpia la marca
+    }));
+    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
+  }
 
-    // Dispatch a custom event to notify other components
-    window.dispatchEvent(new Event('playersUpdated'));
+  window.dispatchEvent(new Event('playersUpdated'));
+  onReveal?.();
+};
 
-    onReveal?.();
-  };
 
 
   return (

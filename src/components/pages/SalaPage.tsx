@@ -8,8 +8,11 @@ import { selectCard, setUser } from '../../store/userSlice';
 import { RootState } from '../../store';
 import { usePlayers } from '../../hooks/usePlayers';
 import logo from '../../assets/Logo.png';
+import VotingResults from '../organisms/VotingResults/VotingResults';
+import type { Role } from '../../store/userSlice'; // 👈 asegúrate de importar el tipo si lo necesitas
 
 const SalaPage = () => {
+  const [revealed, setRevealed] = useState(localStorage.getItem('revealed') === 'true');
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const isInvited = queryParams.get('invited') === 'true';
@@ -24,6 +27,20 @@ const SalaPage = () => {
   const finalRoomName = roomName || 'default';
 
   const { players, addPlayer, playerExists } = usePlayers(finalRoomName);
+
+  useEffect(() => {
+    const syncReveal = () => {
+      const isRevealed = localStorage.getItem('revealed') === 'true';
+      setRevealed(isRevealed);
+    };
+    syncReveal();
+    window.addEventListener('storage', syncReveal);
+    window.addEventListener('playersUpdated', syncReveal);
+    return () => {
+      window.removeEventListener('storage', syncReveal);
+      window.removeEventListener('playersUpdated', syncReveal);
+    };
+  }, []);
 
   useEffect(() => {
     if (isInvited) {
@@ -65,13 +82,14 @@ const SalaPage = () => {
     const playerId = localStorage.getItem('playerId') || crypto.randomUUID();
     if (name && role) {
       localStorage.setItem('playerId', playerId);
-      addPlayer({ name, role, selectedCard });
+      const revealed = localStorage.getItem('revealed') === 'true';
+      addPlayer({ name, role, selectedCard, isNew: revealed });
     }
   }, [name, role, selectedCard]);
 
   const handleModalSubmit = (name: string, role: 'player' | 'spectator') => {
     const esAdmin = localStorage.getItem('esAdmin') === 'true';
-    const assignedRole = esAdmin ? 'admin-player' : role;
+    const assignedRole: Role = esAdmin ? 'admin-player' : role;
 
     localStorage.setItem('playerName', name);
     localStorage.setItem('playerRole', assignedRole);
@@ -81,10 +99,17 @@ const SalaPage = () => {
     setShowModal(false);
   };
 
+  useEffect(() => {
+    const storedName = localStorage.getItem('playerName');
+    const storedRole = localStorage.getItem('playerRole');
+    if (storedName && storedRole) {
+      dispatch(setUser({ name: storedName, role: storedRole as Role }));
+    }
+  }, []);
+
   const handleSelectCard = (card: number | string) => {
     const revealed = localStorage.getItem('revealed') === 'true';
-    if (revealed) return; // bloquea si ya se revelaron las cartas
-
+    if (revealed) return;
     if (role === 'player' || role === 'admin-player') {
       dispatch(selectCard(card));
     }
@@ -117,7 +142,6 @@ const SalaPage = () => {
             <button className="invite-button" onClick={handleInvite}>
               Invitar jugadores
             </button>
-
           </div>
         </div>
 
@@ -130,24 +154,33 @@ const SalaPage = () => {
           />
         )}
 
-        <div className="footer">
-          <p>
-            {name
-              ? `${name}, ${selectedCard ? 'ya elegiste' : 'elige una carta 👇'}`
-              : 'Elige una carta 👇'}
-          </p>
-          <div className="cartas">
-            {[0, 1, 3, 5, 8, 13, 21, 34, 55, 89, '?', '☕'].map((carta, i) => (
-              <div
-                className={`carta ${selectedCard === carta ? 'carta--seleccionada' : ''}`}
-                key={i}
-                onClick={() => handleSelectCard(carta)}
-              >
-                {carta}
-              </div>
-            ))}
-          </div>
+<div className="footer">
+  {revealed ? (
+    <VotingResults players={players} />
+  ) : (
+    (role === 'player' || role === 'admin-player') && (
+      <>
+        <p>
+          {name
+            ? `${name}, ${selectedCard ? 'ya elegiste' : 'elige una carta 👇'}`
+            : 'Elige una carta 👇'}
+        </p>
+        <div className="cartas">
+          {[0, 1, 3, 5, 8, 13, 21, 34, 55, 89, '?', '☕'].map((carta, i) => (
+            <div
+              className={`carta ${selectedCard === carta ? 'carta--seleccionada' : ''}`}
+              key={i}
+              onClick={() => handleSelectCard(carta)}
+            >
+              {carta}
+            </div>
+          ))}
         </div>
+      </>
+    )
+  )}
+</div>
+
       </main>
     </>
   );

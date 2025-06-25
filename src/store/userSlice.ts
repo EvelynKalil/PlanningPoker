@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-type Role = 'admin-player' | 'admin-spectator' | 'player' | 'spectator'
+export type Role = 'player' | 'spectator' | 'admin-player' | 'admin-spectator';
 
 interface UserState {
   name: string | null

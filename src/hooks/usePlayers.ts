@@ -2,9 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 
 export interface Player {
   name: string
-  role: string
+  role: 'player' | 'spectator' | 'admin-player' | 'admin-spectator'
   selectedCard: number | string | null
+  isNew?: boolean
 }
+
+
 
 export const usePlayers = (roomName: string) => {
   const [players, setPlayers] = useState<Player[]>([])
