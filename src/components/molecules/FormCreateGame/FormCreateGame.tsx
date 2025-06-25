@@ -3,7 +3,6 @@ import InputText from '../../atoms/InputText/InputText'
 import Button from '../../atoms/Button/Button'
 import { useNavigate } from 'react-router-dom'
 import './FormCreateGame.css'
-import Header from '../../organisms/Header/Header'
 
 const FormCreateGame = () => {
   const [name, setName] = useState<string>('')

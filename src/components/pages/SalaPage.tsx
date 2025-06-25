@@ -1,27 +1,29 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import './SalaPage.css'
-import ModalPlayer from '../organisms/ModalPlayer/ModalPlayer'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectCard, setUser } from '../../store/userSlice'
-import { RootState } from '../../store'
-import { usePlayers } from '../../hooks/usePlayers'
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import './SalaPage.css';
+import ModalPlayer from '../organisms/ModalPlayer/ModalPlayer';
+import GameTable from '../organisms/GameTable/GameTable';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCard, setUser } from '../../store/userSlice';
+import { RootState } from '../../store';
+import { usePlayers } from '../../hooks/usePlayers';
+import logo from '../../assets/Logo.png'; 
 
 const SalaPage = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const isInvited = queryParams.get('invited') === 'true';
-  const dispatch = useDispatch()
-  const [showModal, setShowModal] = useState(false)
 
-  const user = useSelector((state: RootState) => state.user)
-  const { name, role, selectedCard } = user
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
 
-  const { roomName } = useParams<{ roomName: string }>()
-  const finalRoomName = roomName || 'default'
+  const user = useSelector((state: RootState) => state.user);
+  const { name, role, selectedCard } = user;
 
-  const { players, addPlayer, playerExists } = usePlayers(finalRoomName)
+  const { roomName } = useParams<{ roomName: string }>();
+  const finalRoomName = roomName || 'default';
+
+  const { players, addPlayer, playerExists } = usePlayers(finalRoomName);
 
   useEffect(() => {
     if (isInvited) {
@@ -32,71 +34,59 @@ const SalaPage = () => {
     }
   }, [isInvited]);
 
-
-  // ✅ Identificar si esta es la PRIMERA VEZ en la sala (para definir si es admin)
   useEffect(() => {
-    const previousRoom = localStorage.getItem('salaActual')
-
+    const previousRoom = localStorage.getItem('salaActual');
     if (previousRoom !== finalRoomName) {
-      localStorage.removeItem('playerName')
-      localStorage.removeItem('playerRole')
-      localStorage.removeItem('playerId')
-      localStorage.removeItem('esAdmin')
-      localStorage.setItem('salaActual', finalRoomName)
+      localStorage.removeItem('playerName');
+      localStorage.removeItem('playerRole');
+      localStorage.removeItem('playerId');
+      localStorage.removeItem('esAdmin');
+      localStorage.setItem('salaActual', finalRoomName);
 
-      const storedPlayers = localStorage.getItem(`room:${finalRoomName}:players`)
-      const playersList = storedPlayers ? JSON.parse(storedPlayers) : []
-      if (playersList.length === 0) {
-        localStorage.setItem('esAdmin', 'true')
-      } else {
-        localStorage.setItem('esAdmin', 'false')
-      }
+      const storedPlayers = localStorage.getItem(`room:${finalRoomName}:players`);
+      const playersList = storedPlayers ? JSON.parse(storedPlayers) : [];
+      localStorage.setItem('esAdmin', playersList.length === 0 ? 'true' : 'false');
     }
-  }, [finalRoomName])
+  }, [finalRoomName]);
 
-  // ✅ Mostrar el modal si el jugador aún no está registrado o no existe en la lista
   useEffect(() => {
-    const storedName = localStorage.getItem('playerName')
-    const storedRole = localStorage.getItem('playerRole')
-    const playerId = localStorage.getItem('playerId')
+    const storedName = localStorage.getItem('playerName');
+    const storedRole = localStorage.getItem('playerRole');
+    const playerId = localStorage.getItem('playerId');
 
     if (!storedName || !storedRole || !playerId || !playerExists(storedName)) {
-      setShowModal(true)
+      setShowModal(true);
     } else {
-      setShowModal(false)
+      setShowModal(false);
     }
-  }, [players, finalRoomName])
+  }, [players, finalRoomName]);
 
-  // ✅ Agregar jugador al hook cuando está logueado
   useEffect(() => {
-    const playerId = localStorage.getItem('playerId') || crypto.randomUUID()
+    const playerId = localStorage.getItem('playerId') || crypto.randomUUID();
     if (name && role) {
-      localStorage.setItem('playerId', playerId)
-      addPlayer({ name, role, selectedCard })
+      localStorage.setItem('playerId', playerId);
+      addPlayer({ name, role, selectedCard });
     }
-  }, [name, role, selectedCard])
+  }, [name, role, selectedCard]);
 
-  // ✅ Envío del modal
   const handleModalSubmit = (name: string, role: 'player' | 'spectator') => {
-    const esAdmin = localStorage.getItem('esAdmin') === 'true'
-    const assignedRole = esAdmin ? 'admin-player' : role
+    const esAdmin = localStorage.getItem('esAdmin') === 'true';
+    const assignedRole = esAdmin ? 'admin-player' : role;
 
-    localStorage.setItem('playerName', name)
-    localStorage.setItem('playerRole', assignedRole)
-    localStorage.setItem('playerId', crypto.randomUUID())
+    localStorage.setItem('playerName', name);
+    localStorage.setItem('playerRole', assignedRole);
+    localStorage.setItem('playerId', crypto.randomUUID());
 
-    dispatch(setUser({ name, role: assignedRole }))
-    setShowModal(false)
-  }
+    dispatch(setUser({ name, role: assignedRole }));
+    setShowModal(false);
+  };
 
-  // ✅ Elección de carta
   const handleSelectCard = (card: number | string) => {
     if (role === 'player' || role === 'admin-player') {
-      dispatch(selectCard(card))
+      dispatch(selectCard(card));
     }
-  }
+  };
 
-  // ✅ Copiar link de invitación
   const handleInvite = () => {
     const url = `${window.location.origin}/sala/${finalRoomName}?invited=true`;
     navigator.clipboard.writeText(url)
@@ -104,9 +94,8 @@ const SalaPage = () => {
       .catch(() => alert('Error al copiar el link'));
   };
 
-
-  const currentPlayer = players.find((p) => p.name === name)
-  const otherPlayers = players.filter((p) => p.name !== name)
+  const currentPlayer = players.find((p) => p.name === name);
+  const otherPlayers = players.filter((p) => p.name !== name);
 
   return (
     <>
@@ -114,33 +103,30 @@ const SalaPage = () => {
 
       <main className="sala-page">
         <div className="topbar">
-          <div className="avatar">{name?.slice(0, 2).toUpperCase()}</div>
-          {(role === 'admin-player' || role === 'admin-spectator') && (
-            <button className="invite-button" onClick={handleInvite}>
-              Invitar jugadores
-            </button>
-          )}
+          <div className="topbar-left">
+            <img src={logo} alt="Logo" className="logo" />
+          </div>
+          <div className="topbar-center">
+            <h2 className="room-name">{finalRoomName}</h2>
+          </div>
+          <div className="topbar-right">
+            <div className="avatar">{name?.slice(0, 2).toUpperCase()}</div>
+            {(role === 'admin-player' || role === 'admin-spectator') && (
+              <button className="invite-button" onClick={handleInvite}>
+                Invitar jugadores
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="jugadores-superiores">
-          {otherPlayers.slice(0, 4).map((p) => (
-            <div key={p.name} className="jugador">
-              <div
-                className={`carta-volteada ${p.selectedCard !== null ? 'carta--votada' : ''}`}
-              />
-              <p>{p.name}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mesa-ovalada" />
-
-        <div className="jugador-actual">
-          <div
-            className={`carta-volteada ${selectedCard !== null ? 'carta--votada' : ''}`}
+        {currentPlayer && (
+          <GameTable
+            currentPlayer={currentPlayer}
+            otherPlayers={otherPlayers}
+            isAdmin={role === 'admin-player' || role === 'admin-spectator'}
+            onReveal={() => console.log('Revelar cartas')}
           />
-          <p>{name}</p>
-        </div>
+        )}
 
         <div className="footer">
           <p>
@@ -162,7 +148,7 @@ const SalaPage = () => {
         </div>
       </main>
     </>
-  )
-}
+  );
+};
 
-export default SalaPage
+export default SalaPage;
