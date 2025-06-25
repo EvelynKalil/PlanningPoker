@@ -66,11 +66,12 @@ const FormCreateGame = () => {
       )}
       <div className="button-wrapper">
         <Button
-          label="Crear partida"
           type="submit"
           onClick={() => { }}
           disabled={!isValid}
-        />
+        >
+          Crear partida
+        </Button>
       </div>
     </form>
   )

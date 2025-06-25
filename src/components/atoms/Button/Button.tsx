@@ -1,24 +1,24 @@
+// src/components/atoms/Button.tsx
 import React from 'react'
 import './Button.css'
 
 type ButtonProps = {
-  label: string
-  onClick?: () => void 
+  children: React.ReactNode
+  onClick?: () => void
+  className?: string
+  type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
-  type?: "button" | "submit" | "reset"
 }
 
-const Button = ({ label, onClick, disabled = false, type = "button" }: ButtonProps) => {
-  return (
-    <button
-      className="button"
-      onClick={onClick}
-      disabled={disabled}
-      type={type}
-    >
-      {label}
-    </button>
-  )
-}
+const Button = ({ children, onClick, className = '', type = 'button', disabled }: ButtonProps) => (
+  <button
+    type={type}
+    onClick={onClick}
+    className={`button ${className}`}
+    disabled={disabled}
+  >
+    {children}
+  </button>
+)
 
 export default Button

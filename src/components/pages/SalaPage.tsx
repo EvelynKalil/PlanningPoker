@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectCard, setUser } from '../../store/userSlice';
 import { RootState } from '../../store';
 import { usePlayers } from '../../hooks/usePlayers';
-import logo from '../../assets/Logo.png'; 
+import logo from '../../assets/Logo.png';
 
 const SalaPage = () => {
   const location = useLocation();
@@ -82,6 +82,9 @@ const SalaPage = () => {
   };
 
   const handleSelectCard = (card: number | string) => {
+    const revealed = localStorage.getItem('revealed') === 'true';
+    if (revealed) return; // bloquea si ya se revelaron las cartas
+
     if (role === 'player' || role === 'admin-player') {
       dispatch(selectCard(card));
     }
@@ -111,11 +114,10 @@ const SalaPage = () => {
           </div>
           <div className="topbar-right">
             <div className="avatar">{name?.slice(0, 2).toUpperCase()}</div>
-            {(role === 'admin-player' || role === 'admin-spectator') && (
-              <button className="invite-button" onClick={handleInvite}>
-                Invitar jugadores
-              </button>
-            )}
+            <button className="invite-button" onClick={handleInvite}>
+              Invitar jugadores
+            </button>
+
           </div>
         </div>
 

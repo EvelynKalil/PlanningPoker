@@ -2,30 +2,47 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 80px;
+  margin-top: 150px;
 }
 
 .game-table {
   position: relative;
-  width: 90vw;
-  max-width: 700px;
+  width: 50vw;
+  max-width: 600px;
   aspect-ratio: 2 / 1;
   border-radius: 999px;
   border: 2px solid #7444d6;
   box-shadow: 0 0 12px rgba(185, 104, 255, 0.3);
 }
 
+
+.table-middle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 94%;  /* Tamaño entre el 100% del padre y el 94% del interior */
+  height: 87%; /* Tamaño entre el 100% del padre y el 87% del interior */
+  border-radius: 999px;
+  border: 2px solid #9479e8; 
+  box-shadow: 0 0 11px rgba(185, 104, 255, 0.25);
+}
+
+
 .table-inner {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
-  height: 70%;
+  width: 90%;
+  height: 80%;
   border-radius: 999px;
-  border: 2px solid #9479e8;
+  border: 1px solid #5f15df;
+  background-color: #2e0669;
   box-shadow: 0 0 10px rgba(185, 104, 255, 0.2);
 }
+
+
 
 .player-slot {
   position: absolute;
@@ -38,23 +55,76 @@
 }
 
 /* Slots fijos alrededor de la mesa (0–7), 4 siempre es el jugador */
-.slot-0 { top: 0%; left: 50%; transform: translate(-50%, -50%); }
-.slot-1 { top: 15%; left: 80%; transform: translate(-50%, -50%); }
-.slot-2 { top: 50%; left: 95%; transform: translate(-50%, -50%); }
-.slot-3 { top: 85%; left: 80%; transform: translate(-50%, -50%); }
-.slot-4 { bottom: 0%; left: 50%; transform: translate(-50%, 50%); } /* actual player */
-.slot-5 { top: 85%; left: 20%; transform: translate(-50%, -50%); }
-.slot-6 { top: 50%; left: 5%; transform: translate(-50%, -50%); }
-.slot-7 { top: 15%; left: 20%; transform: translate(-50%, -50%); }
+.slot-0 { 
+  top: -15%;     
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+}
+
+.slot-1 { 
+  top: -15%;      
+  left: 78%;     
+  transform: translate(-50%, -50%); 
+}
+
+.slot-2 { 
+  top: 50%; 
+  left: 110%;   
+  transform: translate(-50%, -50%); 
+}
+
+.slot-3 { 
+  top: 125%;     
+  left: 78%; 
+  transform: translate(-50%, -50%); 
+}
+
+.slot-4 { 
+  bottom: -25%;  
+  left: 50%; 
+  transform: translate(-50%, 50%); 
+}
+
+.slot-5 { 
+  top: 125%;     
+  left: 23%;      
+  transform: translate(-50%, -50%); 
+}
+
+.slot-6 { 
+  top: 50%; 
+  left: -10%;    
+  transform: translate(-50%, -50%); 
+}
+
+.slot-7 { 
+  top: -15%;      
+  left: 23%; 
+  transform: translate(-50%, -50%); 
+}
 
 .carta-volteada {
-  width: 30px;
-  height: 45px;
-  border-radius: 6px;
-  border: 2px solid #bc92ff;
-  margin-bottom: 0.3rem;
+  width: 40px;
+  height: 60px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  color: white;
   background: transparent;
-  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.carta-volteada span {
+  font-size: 1rem;
+}
+
+.carta--votada {
+  box-shadow: 0 0 8px rgba(191, 128, 255, 0.6);
+  border-color: #bf80ff;
 }
 
 .carta-volteada.carta--votada {
@@ -65,16 +135,33 @@
 
 .btn-reveal {
   position: absolute;
-  top: 50%;
+  top: 45%;
   left: 50%;
+  width: 35%;
   transform: translate(-50%, -50%);
   background: #7b3fe4;
   border: none;
   border-radius: 20px;
   color: white;
-  padding: 10px 20px;
+  padding: 5px 20px;
   font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
   z-index: 4;
 }
 
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
