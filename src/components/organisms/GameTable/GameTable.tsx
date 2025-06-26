@@ -55,7 +55,7 @@ const handleReveal = () => {
   setTimeout(() => {
     setLoading(false);
     localStorage.setItem('revealed', 'true');
-    setRevealed(true); // Actualiza el estado local
+    setRevealed(true); 
     window.dispatchEvent(new Event('playersUpdated'));
     onReveal?.();
   }, 2000);
