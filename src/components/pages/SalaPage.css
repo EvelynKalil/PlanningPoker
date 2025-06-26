@@ -115,7 +115,11 @@
 }
 
 .carta--seleccionada {
-  background-color: #8a2be2;
-  border-color: white;
+  background: #d087f9 !important; /* o el color que prefieras */
+  border: 2px solid white !important;
   transform: scale(1.2);
+  color: #1c0040;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
 }
+

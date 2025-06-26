@@ -165,3 +165,9 @@
     transform: rotate(360deg);
   }
 }
+
+.carta--espectador {
+  background-color: #ccc;
+  border: 2px dashed #999;
+  color: #555;
+}

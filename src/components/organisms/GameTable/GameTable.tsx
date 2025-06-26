@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import './GameTable.css'
-import Button from '../../atoms/Button/Button'
+import React, { useEffect, useState } from 'react';
+import './GameTable.css';
+import Button from '../../atoms/Button/Button';
+import { useDispatch } from 'react-redux';
+import { selectCard } from '../../../store/userSlice';
 
 export interface Player {
-  name: string
-  role: 'player' | 'spectator' | 'admin-player' | 'admin-spectator'
-  selectedCard: number | string | null
-  isNew?: boolean
+  name: string;
+  role: 'player' | 'spectator' | 'admin-player' | 'admin-spectator';
+  selectedCard: number | string | null;
+  isNew?: boolean;
 }
 
-
 interface GameTableProps {
-  currentPlayer: Player
-  otherPlayers: Player[]
-  isAdmin: boolean
-  onReveal?: () => void
+  currentPlayer: Player;
+  otherPlayers: Player[];
+  isAdmin: boolean;
+  onReveal?: () => void;
 }
 
 const GameTable: React.FC<GameTableProps> = ({
@@ -23,66 +24,68 @@ const GameTable: React.FC<GameTableProps> = ({
   isAdmin,
   onReveal,
 }) => {
-  const [loading, setLoading] = useState(false)
-  const [revealed, setRevealed] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
-  const maxSpots = 8
-  const playerSlots = Array(maxSpots).fill(null)
-  playerSlots[4] = currentPlayer
-  let j = 0
+  const dispatch = useDispatch();
+
+  const maxSpots = 8;
+  const playerSlots = Array(maxSpots).fill(null);
+  playerSlots[4] = currentPlayer;
+  let j = 0;
   for (let i = 0; i < maxSpots; i++) {
-    if (i === 4) continue
-    playerSlots[i] = otherPlayers[j] || null
-    j++
+    if (i === 4) continue;
+    playerSlots[i] = otherPlayers[j] || null;
+    j++;
   }
 
   const allPlayers = [...otherPlayers, currentPlayer];
-  const allVoted = allPlayers.every((player) => player.selectedCard !== null);
-
+  const activePlayers = allPlayers.filter(
+    (p) => p.role === 'player' || p.role === 'admin-player'
+  );
+  const allVoted = activePlayers.every((player) => player.selectedCard !== null);
 
   useEffect(() => {
     const syncReveal = () => {
-      const isRevealed = localStorage.getItem('revealed') === 'true'
-      setRevealed(isRevealed)
-    }
-    syncReveal()
-    window.addEventListener('storage', syncReveal)
-    return () => window.removeEventListener('storage', syncReveal)
-  }, [])
+      const isRevealed = localStorage.getItem('revealed') === 'true';
+      setRevealed(isRevealed);
+    };
+    syncReveal();
+    window.addEventListener('storage', syncReveal);
+    return () => window.removeEventListener('storage', syncReveal);
+  }, []);
 
-const handleReveal = () => {
-  setLoading(true);
-  setTimeout(() => {
-    setLoading(false);
-    localStorage.setItem('revealed', 'true');
-    setRevealed(true); // Actualiza el estado local
-    window.dispatchEvent(new Event('playersUpdated'));
-    onReveal?.();
-  }, 2000);
-};
-
+  const handleReveal = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      localStorage.setItem('revealed', 'true');
+      setRevealed(true);
+      window.dispatchEvent(new Event('playersUpdated'));
+      onReveal?.();
+    }, 2000);
+  };
 
   const handleNewVote = () => {
-  setRevealed(false);
-  localStorage.setItem('revealed', 'false');
+    setRevealed(false);
+    localStorage.setItem('revealed', 'false');
 
-  const roomName = localStorage.getItem('salaActual') || 'default';
-  const raw = localStorage.getItem(`room:${roomName}:players`);
-  if (raw) {
-    const players = JSON.parse(raw);
-    const updated = players.map((p: Player) => ({
-      ...p,
-      selectedCard: null,
-      isNew: false, // 👈 limpia la marca
-    }));
-    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
-  }
+    const roomName = localStorage.getItem('salaActual') || 'default';
+    const raw = localStorage.getItem(`room:${roomName}:players`);
+    if (raw) {
+      const players = JSON.parse(raw);
+      const updated = players.map((p: Player) => ({
+        ...p,
+        selectedCard: null,
+        isNew: false,
+      }));
+      localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
+    }
 
-  window.dispatchEvent(new Event('playersUpdated'));
-  onReveal?.();
-};
-
-
+    window.dispatchEvent(new Event('playersUpdated'));
+    dispatch(selectCard(null)); // ✅ Limpia la carta seleccionada del jugador actual
+    onReveal?.();
+  };
 
   return (
     <div className="game-table-wrapper">
@@ -95,15 +98,19 @@ const handleReveal = () => {
             {player && (
               <>
                 <div
-                  className={`carta-volteada ${!revealed && player.selectedCard !== null ? 'carta--votada' : ''
-                    }`}
+                  className={`carta-volteada 
+                    ${player.role.includes('spectator') ? 'carta--espectador' : ''}
+                    ${!revealed && player.selectedCard !== null && !player.role.includes('spectator') ? 'carta--votada' : ''}`}
                 >
-                  {revealed && player.selectedCard !== null && (
+                  {revealed && player.selectedCard !== null && !player.role.includes('spectator') && (
                     <span>{player.selectedCard}</span>
                   )}
+                  {player.role.includes('spectator') && <span>👀</span>}
                 </div>
-
-                <p>{player.name}</p>
+                <p>
+                  {player.name}
+                  {player.role.includes('spectator') && ' (Espectador)'}
+                </p>
               </>
             )}
           </div>
@@ -120,9 +127,9 @@ const handleReveal = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-const Spinner = () => <div className="spinner" />
+const Spinner = () => <div className="spinner" />;
 
-export default GameTable
+export default GameTable;

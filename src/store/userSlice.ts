@@ -22,7 +22,7 @@ const userSlice = createSlice({
       state.name = action.payload.name
       state.role = action.payload.role
     },
-    selectCard(state, action: PayloadAction<string | number>) {
+    selectCard: (state, action: PayloadAction<number | string | null>) => {
       state.selectedCard = action.payload
     }
   }

@@ -95,12 +95,13 @@ const ModalPlayer = ({ onSubmit }: ModalPlayerProps) => {
         </div>
 
         <div className="button-wrapper">
-          <Button
-            label="Continuar"
-            type="submit"
-            onClick={() => {}}
-            disabled={!isValid}
-          />
+            <Button
+          type="submit"
+          onClick={() => { }}
+          disabled={!isValid}
+        >
+          Continuar
+        </Button>
         </div>
       </form>
     </div>
