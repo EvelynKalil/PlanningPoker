@@ -9,125 +9,89 @@
   z-index: 1000;
 }
 
-.modal-player {
+.modal-user-settings {
   background-color: #1a063a;
   border: 2px solid #a678f2;
   border-radius: 30px;
   padding: 32px 40px;
-  max-width: 420px;
   width: 100%;
+  max-width: 460px;
   box-shadow: 0 0 20px rgba(185, 104, 255, 0.4);
+  color: white;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  color: white;
 }
+
+.modal-simple {
+  max-height: 220px;
+}
+
+.modal-admin {
+  max-height: 600px;
+}
+
 
 .modal-title {
   font-size: 16px;
   font-weight: 600;
   text-align: left;
-  margin-bottom: -8px;
-  width: 80%;
-  align-self: center;
-}
-
-.modal-player input[type="text"] {
-  background: transparent;
-  border: 2px solid #a678f2;
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 16px;
-  color: white;
-  outline: none;
-  transition: border-color 0.3s ease;
-  width: 70%;
-  align-self: center;
-}
-
-.modal-player input[type="text"].invalid {
-  border-color: #ff4d6d;
-}
-
-.error-list {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  color: #ff4d6d;
-  font-size: 12px;
-  text-align: left;
+  margin-bottom: 4px;
+  align-self: flex-start;
 }
 
 .role-group {
   display: flex;
   justify-content: center;
   gap: 32px;
-  margin-top: 8px;
+  margin-bottom: 16px;
 }
 
-.role-group label {
+.button-wrapper {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  cursor: pointer;
+  justify-content: space-evenly;
+  gap: 12px;
 }
 
-.role-group input[type="radio"] {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #a678f2;
-  border-radius: 50%;
-  position: relative;
-  background: transparent;
-}
-
-.role-group input[type="radio"]:checked::before {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 6px;
-  height: 6px;
-  background-color: #a678f2;
-  border-radius: 50%;
-}
-
-button[type="submit"] {
-  width: 40%;
-  margin-top: 12px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 999px;
-  background-color: #ffffff;
+.btn-primary {
+  background-color: white;
   color: #330072;
   font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  align-self: center;
+  padding: 5px 24px;
+  border-radius: 999px;
 }
 
-
-button[type="submit"]:disabled {
+.btn-secondary {
   background-color: #45385c;
-  cursor: not-allowed;
+  color: white;
+  font-weight: bold;
+  padding:5 px 24px;
+  border-radius: 999px;
+}
+.section-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-.error-list {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  color: #ff4d6d;
-  font-size: 12px;
-  text-align: left;
-  width: 70%; /* igual al input */
-  align-self: center; /* centrado en el form */
-  margin-top: -8px; /* opcional: reduce espacio si queda muy separado */
+.admin-select {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 2px solid #a678f2;
+  background: transparent;
+  color: white;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
-.btn-cancelar {
-  background-color: #45385c !important;
-  color: white !important;
+.admin-select option {
+  background-color: #1a063a;
+  color: white;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #553472;
+  margin: 20px 0 12px;
 }

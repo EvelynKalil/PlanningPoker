@@ -1,0 +1,44 @@
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.admin-select {
+  width: 100%;
+  padding: 10px 16px;
+  padding-right: 40px; /* espacio para el ícono */
+  border-radius: 12px;
+  border: 2px solid #a678f2;
+  background-color: transparent;
+  color: white;
+  font-size: 15px;
+  margin-top: 4px;
+  appearance: none;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-select:hover {
+  border-color: #c79dff;
+}
+
+.admin-select:focus {
+  border-color: #d7b2ff;
+  box-shadow: 0 0 0 3px rgba(166, 120, 242, 0.4);
+}
+
+.admin-select option {
+  background-color: #1a063a;
+  color: white;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #a678f2;
+  font-size: 12px;
+}
