@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './ModalUserSettings.css';
 import Button from '../../atoms/Button/Button';
 import SelectInput from '../../atoms/SelectInput/SelectInput';
-
+import type { Role } from '../../../store/userSlice';
+import { getCurrentSessionPlayer } from '../../../utils/session';
 
 interface Player {
   name: string;
@@ -10,12 +11,16 @@ interface Player {
 }
 
 interface ModalUserSettingsProps {
-  currentRole: 'player' | 'spectator' | 'admin-player' | 'admin-spectator';
+  currentRole: Role;
   onClose: () => void;
-  onRoleChange: (newRole: 'player' | 'spectator' | 'admin-player' | 'admin-spectator') => void;
+  onRoleChange: (newRole: Role) => void;
 }
 
-const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({ currentRole, onClose, onRoleChange }) => {
+const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
+  currentRole,
+  onClose,
+  onRoleChange,
+}) => {
   const [selectedRole, setSelectedRole] = useState(currentRole);
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentName, setCurrentName] = useState('');
@@ -24,8 +29,8 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({ currentRole, onCl
   const isAdmin = currentRole.startsWith('admin');
 
   useEffect(() => {
-    const storedName = localStorage.getItem('playerName') || '';
-    setCurrentName(storedName);
+    const { name } = getCurrentSessionPlayer();
+    setCurrentName(name);
 
     const roomName = localStorage.getItem('salaActual') || 'default';
     const raw = localStorage.getItem(`room:${roomName}:players`);
@@ -33,39 +38,60 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({ currentRole, onCl
       const parsedPlayers: Player[] = JSON.parse(raw);
       setPlayers(parsedPlayers);
     }
+
+    const updatePlayers = () => {
+      const raw = localStorage.getItem(`room:${roomName}:players`);
+      if (raw) {
+        setPlayers(JSON.parse(raw));
+      }
+    };
+
+    window.addEventListener('playersUpdated', updatePlayers);
+    return () => window.removeEventListener('playersUpdated', updatePlayers);
   }, []);
 
   const handleSave = () => {
-    onRoleChange(selectedRole);
+    console.log("roomName actual:", localStorage.getItem("salaActual"));
+    console.log("jugadores actuales:", JSON.parse(localStorage.getItem(`room:${localStorage.getItem("salaActual")}:players`) || '[]'));
 
-    if (isAdmin && selectedAdmin) {
-      const roomName = localStorage.getItem('salaActual') || 'default';
-      const raw = localStorage.getItem(`room:${roomName}:players`);
-      if (raw) {
-        const parsedPlayers: Player[] = JSON.parse(raw);
-        const updatedPlayers = parsedPlayers.map((player) => {
-          if (player.name === currentName) {
-            return {
-              ...player,
-              role: player.role.replace('admin-', ''),
-            };
-          } else if (player.name === selectedAdmin) {
-            return {
-              ...player,
-              role: `admin-${player.role}`,
-            };
-          }
-          return player;
-        });
-        localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
-        localStorage.setItem('playerRole', selectedRole);
-        localStorage.setItem('esAdmin', 'false');
-        window.dispatchEvent(new Event('playersUpdated'));
+    const roomName = localStorage.getItem('salaActual');
+    if (!roomName) return;
+
+    const raw = localStorage.getItem(`room:${roomName}:players`);
+    if (!raw) return;
+
+    const parsedPlayers: Player[] = JSON.parse(raw);
+
+    const updatedPlayers = parsedPlayers.map((player) => {
+      if (player.name === currentName) {
+        const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
+        const shouldKeepAdmin = !selectedAdmin;
+        const newRole = shouldKeepAdmin ? `admin-${baseRole}` : baseRole;
+        return { ...player, role: newRole };
       }
+
+      if (selectedAdmin && player.name === selectedAdmin) {
+        const isSpectator = player.role.includes('spectator');
+        return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
+      }
+
+      return player;
+    });
+
+    // 💾 Guardar cambios
+    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
+
+    const self = updatedPlayers.find(p => p.name === currentName);
+    if (self) {
+      sessionStorage.setItem('playerRole', self.role);
+      sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
+      onRoleChange(self.role as Role);
     }
 
+    window.dispatchEvent(new Event('playersUpdated'));
     onClose();
   };
+
 
   return (
     <div className="modal-backdrop">
@@ -105,7 +131,9 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({ currentRole, onCl
             <SelectInput
               value={selectedAdmin}
               onChange={setSelectedAdmin}
-              options={players.filter((p) => p.name !== currentName).map((p) => p.name)}
+              options={players
+                .filter((p) => p.name !== currentName && !p.role.startsWith('admin'))
+                .map((p) => p.name)}
               placeholder="Selecciona un jugador"
             />
           </>
@@ -119,7 +147,6 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({ currentRole, onCl
             Cancelar
           </Button>
         </div>
-
       </div>
     </div>
   );

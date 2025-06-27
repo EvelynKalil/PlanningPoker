@@ -11,6 +11,8 @@ import { RootState } from '../../store';
 import { usePlayers } from '../../hooks/usePlayers';
 import logo from '../../assets/Logo.png';
 import type { Role } from '../../store/userSlice';
+import type { Player } from '../../hooks/usePlayers';
+import { getCurrentSessionPlayer } from '../../utils/session';
 
 const SalaPage = () => {
   const [revealed, setRevealed] = useState(localStorage.getItem('revealed') === 'true');
@@ -26,7 +28,7 @@ const SalaPage = () => {
   const { name, role, selectedCard } = user;
 
   const { roomName } = useParams<{ roomName: string }>();
-  const finalRoomName = roomName || 'default';
+const finalRoomName = (roomName || 'default').toLowerCase();
   const { players, addPlayer, playerExists } = usePlayers(finalRoomName);
 
   useEffect(() => {
@@ -45,34 +47,38 @@ const SalaPage = () => {
 
   useEffect(() => {
     if (isInvited) {
-      localStorage.removeItem('playerName');
-      localStorage.removeItem('playerRole');
-      localStorage.removeItem('playerId');
-      localStorage.removeItem('esAdmin');
+      sessionStorage.clear();
     }
   }, [isInvited]);
 
-  useEffect(() => {
-    const previousRoom = localStorage.getItem('salaActual');
-    if (previousRoom !== finalRoomName) {
-      localStorage.removeItem('playerName');
-      localStorage.removeItem('playerRole');
-      localStorage.removeItem('playerId');
-      localStorage.removeItem('esAdmin');
-      localStorage.setItem('salaActual', finalRoomName);
+useEffect(() => {
+  if (roomName) {
+    const currentRoom = localStorage.getItem('salaActual');
 
-      const storedPlayers = localStorage.getItem(`room:${finalRoomName}:players`);
-      const playersList = storedPlayers ? JSON.parse(storedPlayers) : [];
-      localStorage.setItem('esAdmin', playersList.length === 0 ? 'true' : 'false');
+    if (!currentRoom || currentRoom !== roomName) {
+      localStorage.setItem('salaActual', roomName);
+
+      const playersKey = `room:${roomName}:players`;
+      const existingPlayers = localStorage.getItem(playersKey);
+
+      if (!existingPlayers) {
+        localStorage.setItem(playersKey, JSON.stringify([]));
+      }
+
+      localStorage.setItem('esAdmin', 'true');
+    } else {
+      localStorage.setItem('esAdmin', 'false');
     }
-  }, [finalRoomName]);
+  }
+}, [roomName]);
+
+
+
 
   useEffect(() => {
-    const storedName = localStorage.getItem('playerName');
-    const storedRole = localStorage.getItem('playerRole');
-    const playerId = localStorage.getItem('playerId');
+    const { name, role, id } = getCurrentSessionPlayer();
 
-    if (!storedName || !storedRole || !playerId || !playerExists(storedName)) {
+    if (!name || !role || !id || !playerExists(name)) {
       setShowModal(true);
     } else {
       setShowModal(false);
@@ -80,25 +86,31 @@ const SalaPage = () => {
   }, [players, finalRoomName]);
 
   useEffect(() => {
-    const playerId = localStorage.getItem('playerId') || crypto.randomUUID();
+    const { name, role, id } = getCurrentSessionPlayer();
     if (name && role) {
-      localStorage.setItem('playerId', playerId);
       const revealed = localStorage.getItem('revealed') === 'true';
-      addPlayer({ name, role, selectedCard, isNew: revealed });
+      addPlayer({ name, role: role as Role, selectedCard, isNew: revealed });
     }
   }, [name, role, selectedCard]);
 
   const handleModalSubmit = (name: string, role: 'player' | 'spectator') => {
-    const esAdmin = localStorage.getItem('esAdmin') === 'true';
-    const assignedRole: Role = esAdmin ? (role === 'player' ? 'admin-player' : 'admin-spectator') : role;
+  const storedPlayers = localStorage.getItem(`room:${finalRoomName}:players`);
+  const playersList = storedPlayers ? JSON.parse(storedPlayers) : [];
+  const isFirstPlayer = playersList.length === 0;
+  const assignedRole: Role = isFirstPlayer
+    ? role === 'player'
+      ? 'admin-player'
+      : 'admin-spectator'
+    : role;
 
-    localStorage.setItem('playerName', name);
-    localStorage.setItem('playerRole', assignedRole);
-    localStorage.setItem('playerId', crypto.randomUUID());
+  sessionStorage.setItem('playerName', name);
+  sessionStorage.setItem('playerRole', assignedRole);
+  sessionStorage.setItem('playerId', crypto.randomUUID());
 
-    dispatch(setUser({ name, role: assignedRole }));
-    setShowModal(false);
-  };
+  dispatch(setUser({ name, role: assignedRole }));
+  setShowModal(false);
+};
+
 
   const handleSelectCard = (card: number | string) => {
     const revealed = localStorage.getItem('revealed') === 'true';
@@ -116,37 +128,61 @@ const SalaPage = () => {
   };
 
   const handleRoleChange = (newRole: Role) => {
-    localStorage.setItem('playerRole', newRole);
-    if (!name) return;
-dispatch(setUser({ name, role: newRole }));
+  sessionStorage.setItem('playerRole', newRole);
+  const { name } = getCurrentSessionPlayer();
+  if (!name) return;
+
+  dispatch(setUser({ name, role: newRole }));
+
+  const roomName = localStorage.getItem('salaActual') || 'default';
+  const raw = localStorage.getItem(`room:${roomName}:players`);
+  if (raw) {
+    const players = JSON.parse(raw);
+    const updated = players.map((p: any) =>
+      p.name === name ? { ...p, role: newRole } : p
+    );
+    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
+    window.dispatchEvent(new Event('playersUpdated'));
+  }
+};
 
 
-    const roomName = localStorage.getItem('salaActual') || 'default';
-    const raw = localStorage.getItem(`room:${roomName}:players`);
-    if (raw) {
-      const players = JSON.parse(raw);
-      const updated = players.map((p: any) =>
-        p.name === name ? { ...p, role: newRole } : p
-      );
-      localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
-      window.dispatchEvent(new Event('playersUpdated'));
+  const { name: currentName } = getCurrentSessionPlayer();
+  const currentPlayer = players.find((p) => p.name === currentName);
+  const otherPlayers = players.filter((p) => p.name !== currentName);
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    const raw = localStorage.getItem(`room:${finalRoomName}:players`);
+    const { name } = getCurrentSessionPlayer();
+    if (raw && name) {
+      try {
+        const parsed = JSON.parse(raw);
+        const me = parsed.find((p: Player) => p.name === name);
+        if (me && me.role !== role) {
+          sessionStorage.setItem('playerRole', me.role);
+          dispatch(setUser({ name, role: me.role }));
+        }
+      } catch (e) {
+        console.error('error in role sync', e);
+      }
     }
-  };
+  }, 500);
 
-  const currentPlayer = players.find((p) => p.name === name);
-  const otherPlayers = players.filter((p) => p.name !== name);
+  return () => clearInterval(interval);
+}, [dispatch, finalRoomName]);
+
 
   return (
     <>
       {showModal && <ModalPlayer onSubmit={handleModalSubmit} />}
       {showUserSettings && role && (
-  <ModalUserSettings
-    currentRole={role as Role}
-    onClose={() => setShowUserSettings(false)}
-    onRoleChange={handleRoleChange}
-  />
-)}
-
+        <ModalUserSettings
+          currentRole={role as Role}
+          onClose={() => setShowUserSettings(false)}
+          onRoleChange={handleRoleChange}
+        />
+      )}
 
       <main className="sala-page">
         <div className="topbar">

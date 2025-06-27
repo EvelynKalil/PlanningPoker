@@ -54,8 +54,8 @@ const ModalPlayer = ({ onSubmit }: ModalPlayerProps) => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (isValid && (role === 'player' || role === 'spectator')) {
-      localStorage.setItem('playerName', name);
-      localStorage.setItem('playerRole', role);
+      sessionStorage.setItem('playerName', name);
+      sessionStorage.setItem('playerRole', role);
       onSubmit(name, role);
     }
   };
