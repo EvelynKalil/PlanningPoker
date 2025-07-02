@@ -171,3 +171,13 @@
   border: 2px dashed #999;
   color: #555;
 }
+
+.loading-wrapper {
+  padding: 12px 24px;
+  background-color: #2e0669;
+  border-radius: 30px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5%;
+}

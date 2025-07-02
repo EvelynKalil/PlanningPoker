@@ -1,19 +1,22 @@
 .modal-backdrop {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3); 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
+
 
 .modal-player {
   background-color: #1a063a;
   border: 2px solid #a678f2;
   border-radius: 30px;
-  padding: 32px 40px;
+  padding: 2rem;
   max-width: 420px;
   width: 100%;
   box-shadow: 0 0 20px rgba(185, 104, 255, 0.4);
@@ -21,6 +24,17 @@
   flex-direction: column;
   gap: 16px;
   color: white;
+  align-items: center;
+}
+
+.input-text {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.7rem 1rem;
+  border-radius: 30px;
+  border: 2px solid #fff;
+  font-size: 1rem;
+  text-align: center; /* Opcional, para que el texto del input se vea centrado */
 }
 
 .modal-title {

@@ -76,46 +76,44 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
   }, []);
 
   const handleSave = () => {
-  const roomName = localStorage.getItem('salaActual');
-  if (!roomName) return;
+    const roomName = localStorage.getItem('salaActual');
+    if (!roomName) return;
 
-  const raw = localStorage.getItem(`room:${roomName}:players`);
-  if (!raw) return;
+    const raw = localStorage.getItem(`room:${roomName}:players`);
+    if (!raw) return;
 
-  const parsedPlayers: Player[] = JSON.parse(raw);
+    const parsedPlayers: Player[] = JSON.parse(raw);
 
-  const updatedPlayers = parsedPlayers.map((player) => {
-    if (player.name === currentName) {
-      // Si el jugador actual es el que está haciendo cambios
-      const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
-      const newRole = selectedAdmin && selectedAdmin !== currentName ? baseRole : `admin-${baseRole}`;
-      return { ...player, role: newRole };
+    const updatedPlayers = parsedPlayers.map((player) => {
+      if (player.name === currentName) {
+        const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
+        const shouldKeepAdmin = !selectedAdmin;
+        const newRole = shouldKeepAdmin ? `admin-${baseRole}` : baseRole;
+        return { ...player, role: newRole };
+      }
+
+      if (selectedAdmin && player.name === selectedAdmin) {
+        const isSpectator = player.role.includes('spectator');
+        return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
+      }
+
+      return player;
+    });
+
+    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
+
+    const self = updatedPlayers.find((p) => p.name === currentName);
+    if (self) {
+      sessionStorage.setItem('playerRole', self.role);
+      sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
+      onRoleChange(self.role as Role);
     }
 
-    if (selectedAdmin && player.name === selectedAdmin) {
-      // Si se ha seleccionado otro jugador como nuevo administrador
-      const isSpectator = player.role.includes('spectator');
-      return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
-    }
-
-    return player;
-  });
-
-  localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
-
-  const self = updatedPlayers.find((p) => p.name === currentName);
-  if (self) {
-    sessionStorage.setItem('playerRole', self.role);
-    sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
-    onRoleChange(self.role as Role);
-  }
-
-  localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
-  window.dispatchEvent(new Event('playersUpdated'));
-  window.dispatchEvent(new Event('cardsUpdated'));
-  onClose();
-};
-
+    localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
+    window.dispatchEvent(new Event('playersUpdated'));
+    window.dispatchEvent(new Event('cardsUpdated'));
+    onClose();
+  };
 
   const removeCard = (index: number) => {
     const updated = [...cards];
@@ -253,10 +251,11 @@ const addCard = () => {
           </>
         )}
 
-        <hr />
+        
 
         {isAdmin && (
           <>
+          <hr />
             <h3 className="section-title">Tarjetas del juego</h3>
             <div className="cards-editor">
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

@@ -3,6 +3,8 @@ import './GameTable.css';
 import Button from '../../atoms/Button/Button';
 import { useDispatch } from 'react-redux';
 import { selectCard } from '../../../store/userSlice';
+import SpinnerCounting from '../../atoms/SpinnerCounting/SpinnerCounting';
+
 
 export interface Player {
   name: string;
@@ -117,14 +119,21 @@ const GameTable: React.FC<GameTableProps> = ({
         ))}
 
         {isAdmin && (
-          <Button
-            onClick={revealed ? handleNewVote : handleReveal}
-            disabled={revealed ? false : !allVoted || loading}
-            className="btn-reveal"
-          >
-            {loading ? <Spinner /> : revealed ? 'Nueva votación' : 'Revelar cartas'}
-          </Button>
+          loading ? (
+            <div className="btn-reveal loading-wrapper">
+              <SpinnerCounting />
+            </div>
+          ) : (
+            <Button
+              onClick={revealed ? handleNewVote : handleReveal}
+              disabled={revealed ? false : !allVoted}
+              className="btn-reveal"
+            >
+              {revealed ? 'Nueva votación' : 'Revelar cartas'}
+            </Button>
+          )
         )}
+
       </div>
     </div>
   );

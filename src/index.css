@@ -1,5 +1,5 @@
 :root {
-    --bg-color: radial-gradient(ellipse at center, #351385 0%, #2b0452 100%);
+  --bg-color: radial-gradient(ellipse at center, #351385 0%, #2b0452 100%);
   --text-color: white;
   --accent-color: #bb86fc;
 }
