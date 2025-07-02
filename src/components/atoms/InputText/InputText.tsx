@@ -1,23 +1,17 @@
-import React from 'react'
-import './InputText.css'
+import React from 'react';
+import './InputText.css';
 
-type InputTextProps = {
-  value: string
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  placeholder?: string
-  isInvalid?: boolean
-}
+type InputTextProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  isInvalid?: boolean;
+};
 
-const InputText = ({ value, onChange, placeholder, isInvalid = false }: InputTextProps) => {
+const InputText: React.FC<InputTextProps> = ({ isInvalid = false, className = '', ...props }) => {
   return (
     <input
-      type="text"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className={`input-text ${isInvalid ? 'invalid' : ''}`}
+      {...props}
+      className={`input-text ${isInvalid ? 'invalid' : ''} ${className}`}
     />
-  )
-}
+  );
+};
 
-export default InputText
+export default InputText;

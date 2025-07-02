@@ -13,8 +13,11 @@ import logo from '../../assets/Logo.png';
 import type { Role } from '../../store/userSlice';
 import type { Player } from '../../hooks/usePlayers';
 import { getCurrentSessionPlayer } from '../../utils/session';
+import InviteModal from '../organisms/InviteModal/InviteModal';
+
 
 const SalaPage = () => {
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [revealed, setRevealed] = useState(localStorage.getItem('revealed') === 'true');
   const [showModal, setShowModal] = useState(false);
   const [showUserSettings, setShowUserSettings] = useState(false);
@@ -121,30 +124,30 @@ const SalaPage = () => {
   };
 
   const handleInvite = () => {
-    const url = `${window.location.origin}/sala/${finalRoomName}?invited=true`;
-    navigator.clipboard.writeText(url)
-      .then(() => alert('¡Link copiado al portapapeles!'))
-      .catch(() => alert('Error al copiar el link'));
+    setShowInviteModal(true);
   };
 
   const handleRoleChange = (newRole: Role) => {
-    sessionStorage.setItem('playerRole', newRole);
-    const { name } = getCurrentSessionPlayer();
-    if (!name) return;
+  const current = getCurrentSessionPlayer();
+  const sessionName = sessionStorage.getItem('playerName');
 
-    dispatch(setUser({ name, role: newRole }));
+  if (!current.name || current.name !== sessionName) return; // 👈 Evita cambios si no es el usuario actual
 
-    const roomName = (localStorage.getItem('salaActual') || 'default').toLowerCase();
-    const raw = localStorage.getItem(`room:${roomName}:players`);
-    if (raw) {
-      const players = JSON.parse(raw);
-      const updated = players.map((p: any) =>
-        p.name === name ? { ...p, role: newRole } : p
-      );
-      localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
-      window.dispatchEvent(new Event('playersUpdated'));
-    }
-  };
+  sessionStorage.setItem('playerRole', newRole);
+  dispatch(setUser({ name: current.name, role: newRole }));
+
+  const roomName = (localStorage.getItem('salaActual') || 'default').toLowerCase();
+  const raw = localStorage.getItem(`room:${roomName}:players`);
+  if (raw) {
+    const players = JSON.parse(raw);
+    const updated = players.map((p: any) =>
+      p.name === current.name ? { ...p, role: newRole } : p
+    );
+    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
+    window.dispatchEvent(new Event('playersUpdated'));
+  }
+};
+
 
 
   const { name: currentName } = getCurrentSessionPlayer();
@@ -172,6 +175,24 @@ const SalaPage = () => {
     return () => clearInterval(interval);
   }, [dispatch, finalRoomName]);
 
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    const raw = localStorage.getItem(`room:${finalRoomName}:players`);
+    const { name } = getCurrentSessionPlayer();
+    if (raw && name) {
+      const players = JSON.parse(raw);
+      const me = players.find((p: Player) => p.name === name);
+      if (me && me.selectedCard !== selectedCard) {
+        dispatch(selectCard(me.selectedCard));
+      }
+    }
+  }, 500); // Revisa cada medio segundo
+
+  return () => clearInterval(interval);
+}, [dispatch, finalRoomName, selectedCard]);
+
+
   const [cards, setCards] = useState<(string | number)[]>([]);
 
   useEffect(() => {
@@ -190,6 +211,24 @@ const SalaPage = () => {
     window.addEventListener("cardsUpdated", handleCardsUpdated);
     return () => window.removeEventListener("cardsUpdated", handleCardsUpdated);
   }, []);
+
+useEffect(() => {
+  const syncSelectedCard = () => {
+    const raw = localStorage.getItem(`room:${finalRoomName}:players`);
+    const { name } = getCurrentSessionPlayer();
+    if (raw && name) {
+      const players = JSON.parse(raw);
+      const me = players.find((p: Player) => p.name === name);
+      if (me) {
+        dispatch(selectCard(me.selectedCard)); // ✅ SOLO actualizar carta
+      }
+    }
+  };
+
+  window.addEventListener('playersUpdated', syncSelectedCard);
+  return () => window.removeEventListener('playersUpdated', syncSelectedCard);
+}, [dispatch, finalRoomName]);
+
 
 
 
@@ -221,6 +260,14 @@ const SalaPage = () => {
             </button>
           </div>
         </div>
+
+        {showInviteModal && (
+          <InviteModal
+            roomLink={`${window.location.origin}/sala/${finalRoomName}?invited=true`}
+            onClose={() => setShowInviteModal(false)}
+          />
+        )}
+
 
         {currentPlayer && (
           <GameTable

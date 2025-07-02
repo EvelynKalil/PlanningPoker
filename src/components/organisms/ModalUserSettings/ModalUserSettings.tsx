@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './ModalUserSettings.css';
 import Button from '../../atoms/Button/Button';
+import RadioButton from '../../atoms/RadioButton/RadioButton';
 import SelectInput from '../../atoms/SelectInput/SelectInput';
+import Input from '../../atoms/InputText/InputText';
 import type { Role } from '../../../store/userSlice';
 import { getCurrentSessionPlayer } from '../../../utils/session';
 import {
@@ -35,6 +37,7 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
   onClose,
   onRoleChange,
 }) => {
+  const [cardError, setCardError] = useState('');
   const [selectedRole, setSelectedRole] = useState(currentRole);
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentName, setCurrentName] = useState('');
@@ -73,44 +76,46 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
   }, []);
 
   const handleSave = () => {
-    const roomName = localStorage.getItem('salaActual');
-    if (!roomName) return;
+  const roomName = localStorage.getItem('salaActual');
+  if (!roomName) return;
 
-    const raw = localStorage.getItem(`room:${roomName}:players`);
-    if (!raw) return;
+  const raw = localStorage.getItem(`room:${roomName}:players`);
+  if (!raw) return;
 
-    const parsedPlayers: Player[] = JSON.parse(raw);
+  const parsedPlayers: Player[] = JSON.parse(raw);
 
-    const updatedPlayers = parsedPlayers.map((player) => {
-      if (player.name === currentName) {
-        const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
-        const shouldKeepAdmin = !selectedAdmin;
-        const newRole = shouldKeepAdmin ? `admin-${baseRole}` : baseRole;
-        return { ...player, role: newRole };
-      }
-
-      if (selectedAdmin && player.name === selectedAdmin) {
-        const isSpectator = player.role.includes('spectator');
-        return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
-      }
-
-      return player;
-    });
-
-    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
-
-    const self = updatedPlayers.find((p) => p.name === currentName);
-    if (self) {
-      sessionStorage.setItem('playerRole', self.role);
-      sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
-      onRoleChange(self.role as Role);
+  const updatedPlayers = parsedPlayers.map((player) => {
+    if (player.name === currentName) {
+      // Si el jugador actual es el que está haciendo cambios
+      const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
+      const newRole = selectedAdmin && selectedAdmin !== currentName ? baseRole : `admin-${baseRole}`;
+      return { ...player, role: newRole };
     }
 
-    localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
-    window.dispatchEvent(new Event('playersUpdated'));
-    window.dispatchEvent(new Event('cardsUpdated'));
-    onClose();
-  };
+    if (selectedAdmin && player.name === selectedAdmin) {
+      // Si se ha seleccionado otro jugador como nuevo administrador
+      const isSpectator = player.role.includes('spectator');
+      return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
+    }
+
+    return player;
+  });
+
+  localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
+
+  const self = updatedPlayers.find((p) => p.name === currentName);
+  if (self) {
+    sessionStorage.setItem('playerRole', self.role);
+    sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
+    onRoleChange(self.role as Role);
+  }
+
+  localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
+  window.dispatchEvent(new Event('playersUpdated'));
+  window.dispatchEvent(new Event('cardsUpdated'));
+  onClose();
+};
+
 
   const removeCard = (index: number) => {
     const updated = [...cards];
@@ -118,16 +123,38 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
     setCards(updated);
   };
 
-  const addCard = () => {
-    const trimmed = newCard.trim();
-    if (!trimmed) return;
-    if (trimmed.length > 15) return;
-    const formatted = isNaN(+trimmed) ? trimmed : +trimmed;
-    if (cards.includes(formatted)) return;
+const addCard = () => {
+  const trimmed = newCard.trim();
+  if (!trimmed) {
+    setCardError('No puede estar vacío');
+    return;
+  }
 
-    setCards([...cards, formatted]);
-    setNewCard('');
-  };
+  const numericValue = +trimmed;
+  const isNumber = !isNaN(numericValue);
+  const value = isNumber ? numericValue : trimmed;
+
+  if (cards.includes(value)) {
+    setCardError('Esa tarjeta ya existe');
+    return;
+  }
+
+  if (isNumber && numericValue > 999) {
+    setCardError('El número máximo es 999');
+    return;
+  }
+
+  if (trimmed.length > 15) {
+    setCardError('Máximo 15 caracteres');
+    return;
+  }
+
+  setCards([...cards, value]);
+  setNewCard('');
+  setCardError(''); // ✅ Limpiar errores
+};
+
+
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -191,30 +218,24 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
       <div className={`modal-user-settings ${isAdmin ? 'admin' : ''}`}>
         <h3 className="section-title">Modo de juego</h3>
         <div className="role-group">
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="player"
-              checked={selectedRole === 'player' || selectedRole === 'admin-player'}
-              onChange={() =>
-                setSelectedRole(currentRole.startsWith('admin') ? 'admin-player' : 'player')
-              }
-            />
-            Jugador
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="spectator"
-              checked={selectedRole === 'spectator' || selectedRole === 'admin-spectator'}
-              onChange={() =>
-                setSelectedRole(currentRole.startsWith('admin') ? 'admin-spectator' : 'spectator')
-              }
-            />
-            Espectador
-          </label>
+          <RadioButton
+            label="Jugador"
+            name="role"
+            value="player"
+            checked={selectedRole === 'player' || selectedRole === 'admin-player'}
+            onChange={() =>
+              setSelectedRole(currentRole.startsWith('admin') ? 'admin-player' : 'player')
+            }
+          />
+          <RadioButton
+            label="Espectador"
+            name="role"
+            value="spectator"
+            checked={selectedRole === 'spectator' || selectedRole === 'admin-spectator'}
+            onChange={() =>
+              setSelectedRole(currentRole.startsWith('admin') ? 'admin-spectator' : 'spectator')
+            }
+          />
         </div>
 
         {isAdmin && (
@@ -247,18 +268,17 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
                   </div>
                 </SortableContext>
               </DndContext>
-
               <div className="card-input">
-                <input
+                <Input
                   value={newCard}
                   onChange={(e) => setNewCard(e.target.value)}
                   placeholder="Nueva tarjeta"
-                  maxLength={15}
                 />
                 <Button type="button" className="btn-add-card" disabled={!newCard.trim()} onClick={addCard}>
                   Añadir
                 </Button>
               </div>
+              <div className="card-error">{cardError}</div>
             </div>
           </>
         )}

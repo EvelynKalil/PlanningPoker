@@ -156,9 +156,8 @@ hr {
   border: 1px solid #a678f2;
   flex: 1;
   font-size: 14px;
-  height: 20px;
-  background-color: white;
-  color: black;
+  height: 25px;
+  color: rgb(255, 255, 255);
 }
 
 .card-input .btn-add-card {

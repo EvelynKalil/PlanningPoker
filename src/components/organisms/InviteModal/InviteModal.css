@@ -1,0 +1,48 @@
+.invite-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.invite-modal {
+  background: #1a063a;
+  border: 2px solid #a678f2;
+  border-radius: 20px;
+  padding: 24px 32px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 10px rgba(166, 120, 242, 0.4);
+  color: white;
+  text-align: center;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.invite-link {
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid #a678f2;
+  background: transparent;
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
