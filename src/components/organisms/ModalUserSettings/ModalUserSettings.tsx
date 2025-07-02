@@ -89,8 +89,47 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
     }
 
     window.dispatchEvent(new Event('playersUpdated'));
+
+    saveCards();
     onClose();
   };
+
+  // Estado adicional
+  const [cards, setCards] = useState<(string | number)[]>([]);
+  const [newCard, setNewCard] = useState("");
+
+  // Cargar las tarjetas
+  useEffect(() => {
+    const room = localStorage.getItem("salaActual") || "default";
+    const raw = localStorage.getItem(`room:${room}:cards`);
+    setCards(raw ? JSON.parse(raw) : [0, 1, 3, 5, 8, 13, 21, 34, 55, 89, "?", "☕"]);
+  }, []);
+
+  // 🗑 Eliminar
+const removeCard = (index: number) => {
+  const updated = [...cards];
+  updated.splice(index, 1);
+  setCards(updated);
+};
+
+// ➕ Añadir
+const addCard = () => {
+  const trimmed = newCard.trim();
+  if (!trimmed) return;
+  if (trimmed.length > 15) return;
+  if (cards.includes(isNaN(+trimmed) ? trimmed : +trimmed)) return;
+
+  const formatted = isNaN(+trimmed) ? trimmed : +trimmed;
+  setCards([...cards, formatted]);
+  setNewCard("");
+};
+
+// 💾 Guardar tarjetas
+const saveCards = () => {
+  const room = localStorage.getItem("salaActual") || "default";
+  localStorage.setItem(`room:${room}:cards`, JSON.stringify(cards));
+  window.dispatchEvent(new Event("cardsUpdated"));
+};
 
 
   return (
@@ -138,6 +177,35 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
             />
           </>
         )}
+
+        <hr />
+<h3 className="section-title">Tarjetas del juego</h3>
+<div className="cards-editor">
+  <div className="card-list">
+    {cards.map((card, index) => (
+      <div
+        key={index}
+        className="editable-card"
+        onMouseEnter={() => {}}
+        onMouseLeave={() => {}}
+      >
+        {card}
+        <span className="delete-btn" onClick={() => removeCard(index)}>✖</span>
+      </div>
+    ))}
+  </div>
+
+  <div className="card-input">
+    <input
+      value={newCard}
+      onChange={(e) => setNewCard(e.target.value)}
+      placeholder="Nueva tarjeta"
+      maxLength={15}
+    />
+    <button onClick={addCard}>Añadir</button>
+  </div>
+</div>
+
 
         <div className="button-wrapper">
           <Button className="btn-primary" type="button" onClick={handleSave}>

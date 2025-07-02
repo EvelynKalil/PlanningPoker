@@ -28,7 +28,7 @@ const SalaPage = () => {
   const { name, role, selectedCard } = user;
 
   const { roomName } = useParams<{ roomName: string }>();
-const finalRoomName = (roomName || 'default').toLowerCase();
+  const finalRoomName = (roomName || 'default').toLowerCase();
   const { players, addPlayer, playerExists } = usePlayers(finalRoomName);
 
   useEffect(() => {
@@ -51,26 +51,26 @@ const finalRoomName = (roomName || 'default').toLowerCase();
     }
   }, [isInvited]);
 
-useEffect(() => {
-  if (roomName) {
-    const currentRoom = localStorage.getItem('salaActual');
+  useEffect(() => {
+    if (roomName) {
+      const currentRoom = localStorage.getItem('salaActual');
 
-    if (!currentRoom || currentRoom !== roomName) {
-      localStorage.setItem('salaActual', roomName);
+      if (!currentRoom || currentRoom !== roomName) {
+        localStorage.setItem('salaActual', roomName);
 
-      const playersKey = `room:${roomName}:players`;
-      const existingPlayers = localStorage.getItem(playersKey);
+        const playersKey = `room:${roomName}:players`;
+        const existingPlayers = localStorage.getItem(playersKey);
 
-      if (!existingPlayers) {
-        localStorage.setItem(playersKey, JSON.stringify([]));
+        if (!existingPlayers) {
+          localStorage.setItem(playersKey, JSON.stringify([]));
+        }
+
+        localStorage.setItem('esAdmin', 'true');
+      } else {
+        localStorage.setItem('esAdmin', 'false');
       }
-
-      localStorage.setItem('esAdmin', 'true');
-    } else {
-      localStorage.setItem('esAdmin', 'false');
     }
-  }
-}, [roomName]);
+  }, [roomName]);
 
 
 
@@ -94,22 +94,22 @@ useEffect(() => {
   }, [name, role, selectedCard]);
 
   const handleModalSubmit = (name: string, role: 'player' | 'spectator') => {
-  const storedPlayers = localStorage.getItem(`room:${finalRoomName}:players`);
-  const playersList = storedPlayers ? JSON.parse(storedPlayers) : [];
-  const isFirstPlayer = playersList.length === 0;
-  const assignedRole: Role = isFirstPlayer
-    ? role === 'player'
-      ? 'admin-player'
-      : 'admin-spectator'
-    : role;
+    const storedPlayers = localStorage.getItem(`room:${finalRoomName}:players`);
+    const playersList = storedPlayers ? JSON.parse(storedPlayers) : [];
+    const isFirstPlayer = playersList.length === 0;
+    const assignedRole: Role = isFirstPlayer
+      ? role === 'player'
+        ? 'admin-player'
+        : 'admin-spectator'
+      : role;
 
-  sessionStorage.setItem('playerName', name);
-  sessionStorage.setItem('playerRole', assignedRole);
-  sessionStorage.setItem('playerId', crypto.randomUUID());
+    sessionStorage.setItem('playerName', name);
+    sessionStorage.setItem('playerRole', assignedRole);
+    sessionStorage.setItem('playerId', crypto.randomUUID());
 
-  dispatch(setUser({ name, role: assignedRole }));
-  setShowModal(false);
-};
+    dispatch(setUser({ name, role: assignedRole }));
+    setShowModal(false);
+  };
 
 
   const handleSelectCard = (card: number | string) => {
@@ -128,23 +128,23 @@ useEffect(() => {
   };
 
   const handleRoleChange = (newRole: Role) => {
-  sessionStorage.setItem('playerRole', newRole);
-  const { name } = getCurrentSessionPlayer();
-  if (!name) return;
+    sessionStorage.setItem('playerRole', newRole);
+    const { name } = getCurrentSessionPlayer();
+    if (!name) return;
 
-  dispatch(setUser({ name, role: newRole }));
+    dispatch(setUser({ name, role: newRole }));
 
-  const roomName = localStorage.getItem('salaActual') || 'default';
-  const raw = localStorage.getItem(`room:${roomName}:players`);
-  if (raw) {
-    const players = JSON.parse(raw);
-    const updated = players.map((p: any) =>
-      p.name === name ? { ...p, role: newRole } : p
-    );
-    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
-    window.dispatchEvent(new Event('playersUpdated'));
-  }
-};
+    const roomName = (localStorage.getItem('salaActual') || 'default').toLowerCase();
+    const raw = localStorage.getItem(`room:${roomName}:players`);
+    if (raw) {
+      const players = JSON.parse(raw);
+      const updated = players.map((p: any) =>
+        p.name === name ? { ...p, role: newRole } : p
+      );
+      localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updated));
+      window.dispatchEvent(new Event('playersUpdated'));
+    }
+  };
 
 
   const { name: currentName } = getCurrentSessionPlayer();
@@ -152,25 +152,45 @@ useEffect(() => {
   const otherPlayers = players.filter((p) => p.name !== currentName);
 
   useEffect(() => {
-  const interval = setInterval(() => {
-    const raw = localStorage.getItem(`room:${finalRoomName}:players`);
-    const { name } = getCurrentSessionPlayer();
-    if (raw && name) {
-      try {
-        const parsed = JSON.parse(raw);
-        const me = parsed.find((p: Player) => p.name === name);
-        if (me && me.role !== role) {
-          sessionStorage.setItem('playerRole', me.role);
-          dispatch(setUser({ name, role: me.role }));
+    const interval = setInterval(() => {
+      const raw = localStorage.getItem(`room:${finalRoomName}:players`);
+      const { name } = getCurrentSessionPlayer();
+      if (raw && name) {
+        try {
+          const parsed = JSON.parse(raw);
+          const me = parsed.find((p: Player) => p.name === name);
+          if (me && me.role !== role) {
+            sessionStorage.setItem('playerRole', me.role);
+            dispatch(setUser({ name, role: me.role }));
+          }
+        } catch (e) {
+          console.error('error in role sync', e);
         }
-      } catch (e) {
-        console.error('error in role sync', e);
       }
-    }
-  }, 500);
+    }, 500);
 
-  return () => clearInterval(interval);
-}, [dispatch, finalRoomName]);
+    return () => clearInterval(interval);
+  }, [dispatch, finalRoomName]);
+
+  const [cards, setCards] = useState<(string | number)[]>([]);
+
+  useEffect(() => {
+    const room = localStorage.getItem("salaActual") || "default";
+    const raw = localStorage.getItem(`room:${room}:cards`);
+    setCards(raw ? JSON.parse(raw) : [0, 1, 3, 5, 8, 13, 21, 34, 55, 89, "?", "☕"]);
+  }, []);
+
+  useEffect(() => {
+    const handleCardsUpdated = () => {
+      const room = localStorage.getItem("salaActual") || "default";
+      const raw = localStorage.getItem(`room:${room}:cards`);
+      setCards(raw ? JSON.parse(raw) : []);
+    };
+
+    window.addEventListener("cardsUpdated", handleCardsUpdated);
+    return () => window.removeEventListener("cardsUpdated", handleCardsUpdated);
+  }, []);
+
 
 
   return (
@@ -223,7 +243,7 @@ useEffect(() => {
                     : 'Elige una carta 👇'}
                 </p>
                 <div className="cartas">
-                  {[0, 1, 3, 5, 8, 13, 21, 34, 55, 89, '?', '☕'].map((carta, i) => (
+                  {cards.map((carta, i) => (
                     <div
                       className={`carta ${selectedCard === carta ? 'carta--seleccionada' : ''}`}
                       key={i}
@@ -233,6 +253,7 @@ useEffect(() => {
                     </div>
                   ))}
                 </div>
+
               </>
             )
           )}
