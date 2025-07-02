@@ -4,6 +4,20 @@ import Button from '../../atoms/Button/Button';
 import SelectInput from '../../atoms/SelectInput/SelectInput';
 import type { Role } from '../../../store/userSlice';
 import { getCurrentSessionPlayer } from '../../../utils/session';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Player {
   name: string;
@@ -25,6 +39,8 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentName, setCurrentName] = useState('');
   const [selectedAdmin, setSelectedAdmin] = useState('');
+  const [cards, setCards] = useState<(string | number)[]>([]);
+  const [newCard, setNewCard] = useState('');
 
   const isAdmin = currentRole.startsWith('admin');
 
@@ -50,10 +66,13 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
     return () => window.removeEventListener('playersUpdated', updatePlayers);
   }, []);
 
-  const handleSave = () => {
-    console.log("roomName actual:", localStorage.getItem("salaActual"));
-    console.log("jugadores actuales:", JSON.parse(localStorage.getItem(`room:${localStorage.getItem("salaActual")}:players`) || '[]'));
+  useEffect(() => {
+    const room = localStorage.getItem('salaActual') || 'default';
+    const raw = localStorage.getItem(`room:${room}:cards`);
+    setCards(raw ? JSON.parse(raw) : [0, 1, 3, 5, 8, 13, 21, 34, 55, 89, '?', '☕']);
+  }, []);
 
+  const handleSave = () => {
     const roomName = localStorage.getItem('salaActual');
     if (!roomName) return;
 
@@ -78,59 +97,94 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
       return player;
     });
 
-    // 💾 Guardar cambios
     localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
 
-    const self = updatedPlayers.find(p => p.name === currentName);
+    const self = updatedPlayers.find((p) => p.name === currentName);
     if (self) {
       sessionStorage.setItem('playerRole', self.role);
       sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
       onRoleChange(self.role as Role);
     }
 
+    localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
     window.dispatchEvent(new Event('playersUpdated'));
-
-    saveCards();
+    window.dispatchEvent(new Event('cardsUpdated'));
     onClose();
   };
 
-  // Estado adicional
-  const [cards, setCards] = useState<(string | number)[]>([]);
-  const [newCard, setNewCard] = useState("");
+  const removeCard = (index: number) => {
+    const updated = [...cards];
+    updated.splice(index, 1);
+    setCards(updated);
+  };
 
-  // Cargar las tarjetas
-  useEffect(() => {
-    const room = localStorage.getItem("salaActual") || "default";
-    const raw = localStorage.getItem(`room:${room}:cards`);
-    setCards(raw ? JSON.parse(raw) : [0, 1, 3, 5, 8, 13, 21, 34, 55, 89, "?", "☕"]);
-  }, []);
+  const addCard = () => {
+    const trimmed = newCard.trim();
+    if (!trimmed) return;
+    if (trimmed.length > 15) return;
+    const formatted = isNaN(+trimmed) ? trimmed : +trimmed;
+    if (cards.includes(formatted)) return;
 
-  // 🗑 Eliminar
-const removeCard = (index: number) => {
-  const updated = [...cards];
-  updated.splice(index, 1);
-  setCards(updated);
-};
+    setCards([...cards, formatted]);
+    setNewCard('');
+  };
 
-// ➕ Añadir
-const addCard = () => {
-  const trimmed = newCard.trim();
-  if (!trimmed) return;
-  if (trimmed.length > 15) return;
-  if (cards.includes(isNaN(+trimmed) ? trimmed : +trimmed)) return;
+  const sensors = useSensors(useSensor(PointerSensor));
 
-  const formatted = isNaN(+trimmed) ? trimmed : +trimmed;
-  setCards([...cards, formatted]);
-  setNewCard("");
-};
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = cards.findIndex((card) => card.toString() === active.id);
+      const newIndex = cards.findIndex((card) => card.toString() === over.id);
+      setCards((cards) => arrayMove(cards, oldIndex, newIndex));
+    }
+  };
 
-// 💾 Guardar tarjetas
-const saveCards = () => {
-  const room = localStorage.getItem("salaActual") || "default";
-  localStorage.setItem(`room:${room}:cards`, JSON.stringify(cards));
-  window.dispatchEvent(new Event("cardsUpdated"));
-};
+  const SortableCard = ({ id, index }: { id: string | number; index: number }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+    } = useSortable({ id: id.toString() });
 
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    const handleRemove = (e: React.MouseEvent) => {
+      e.stopPropagation(); // 🔥 Detiene el arrastre
+      removeCard(index);
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className="editable-card"
+      >
+        {id}
+        <span
+          className="delete-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            removeCard(index);
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault(); // 🔥 ¡Esto es la clave!
+          }}
+        >
+          ✖
+        </span>
+
+      </div>
+    );
+  };
 
   return (
     <div className="modal-backdrop">
@@ -179,34 +233,35 @@ const saveCards = () => {
         )}
 
         <hr />
-<h3 className="section-title">Tarjetas del juego</h3>
-<div className="cards-editor">
-  <div className="card-list">
-    {cards.map((card, index) => (
-      <div
-        key={index}
-        className="editable-card"
-        onMouseEnter={() => {}}
-        onMouseLeave={() => {}}
-      >
-        {card}
-        <span className="delete-btn" onClick={() => removeCard(index)}>✖</span>
-      </div>
-    ))}
-  </div>
 
-  <div className="card-input">
-    <input
-      value={newCard}
-      onChange={(e) => setNewCard(e.target.value)}
-      placeholder="Nueva tarjeta"
-      maxLength={15}
-    />
-    <button onClick={addCard}>Añadir</button>
-  </div>
-</div>
+        {isAdmin && (
+          <>
+            <h3 className="section-title">Tarjetas del juego</h3>
+            <div className="cards-editor">
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={cards.map((card) => card.toString())} strategy={verticalListSortingStrategy}>
+                  <div className="card-list">
+                    {cards.map((card, index) => (
+                      <SortableCard key={card.toString()} id={card} index={index} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
 
-
+              <div className="card-input">
+                <input
+                  value={newCard}
+                  onChange={(e) => setNewCard(e.target.value)}
+                  placeholder="Nueva tarjeta"
+                  maxLength={15}
+                />
+                <Button type="button" className="btn-add-card" disabled={!newCard.trim()} onClick={addCard}>
+                  Añadir
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
         <div className="button-wrapper">
           <Button className="btn-primary" type="button" onClick={handleSave}>
             Guardar
