@@ -25,20 +25,25 @@ export const usePlayers = (roomName: string) => {
   };
 
   useEffect(() => {
-    readPlayersFromStorage(); // read initially
+    readPlayersFromStorage(); // ⏱ lee al montar
 
-    const interval = setInterval(() => {
-      readPlayersFromStorage();
-    }, 500);
+    const interval = setInterval(readPlayersFromStorage, 500);
 
-    const syncListener = () => readPlayersFromStorage();
-    window.addEventListener('storage', syncListener);
-    window.addEventListener('playersUpdated', syncListener);
+    const syncFromEvent = () => readPlayersFromStorage();
+
+    const syncFromOtherTab = (e: StorageEvent) => {
+      if (e.key?.includes('room:') || e.key === 'revealed') {
+        readPlayersFromStorage();
+      }
+    };
+
+    window.addEventListener('playersUpdated', syncFromEvent);
+    window.addEventListener('storage', syncFromOtherTab);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('storage', syncListener);
-      window.removeEventListener('playersUpdated', syncListener);
+      window.removeEventListener('playersUpdated', syncFromEvent);
+      window.removeEventListener('storage', syncFromOtherTab);
     };
   }, [roomName]);
 
@@ -52,7 +57,7 @@ export const usePlayers = (roomName: string) => {
     const updatedString = JSON.stringify(updated);
     localStorage.setItem(`room:${roomName}:players`, updatedString);
     setPlayers(updated);
-    window.dispatchEvent(new Event('playersUpdated')); // 🚀 Notifica a otros componentes
+    window.dispatchEvent(new Event('playersUpdated'));
   };
 
   const playerExists = (name: string) => {

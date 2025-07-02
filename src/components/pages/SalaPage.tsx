@@ -192,6 +192,18 @@ const SalaPage = () => {
   return () => clearInterval(interval);
 }, [dispatch, finalRoomName, selectedCard]);
 
+useEffect(() => {
+  const handleStorageChange = (e: StorageEvent) => {
+    if (e.key?.includes('room:') && e.key?.includes(':cards')) {
+      window.dispatchEvent(new Event('cardsUpdated'));
+    }
+  };
+
+  window.addEventListener('storage', handleStorageChange);
+  return () => window.removeEventListener('storage', handleStorageChange);
+}, []);
+
+
 
   const [cards, setCards] = useState<(string | number)[]>([]);
 
@@ -220,7 +232,7 @@ useEffect(() => {
       const players = JSON.parse(raw);
       const me = players.find((p: Player) => p.name === name);
       if (me) {
-        dispatch(selectCard(me.selectedCard)); // ✅ SOLO actualizar carta
+        dispatch(selectCard(me.selectedCard)); // ✅ sincroniza
       }
     }
   };
@@ -230,6 +242,55 @@ useEffect(() => {
 }, [dispatch, finalRoomName]);
 
 
+
+
+useEffect(() => {
+  const handleBeforeUnload = () => {
+    const room = finalRoomName || 'default'; // ✅ usa finalRoomName directo
+    const raw = localStorage.getItem(`room:${room}:players`);
+    const currentName = sessionStorage.getItem('playerName');
+
+    if (!raw || !currentName) return;
+
+    const players = JSON.parse(raw);
+    const current = players.find((p: any) => p.name === currentName);
+
+    const isAdmin = current?.role?.startsWith('admin');
+    const remainingPlayers = players.filter((p: any) => p.name !== currentName);
+
+    if (isAdmin && remainingPlayers.length > 0) {
+      const randomIndex = Math.floor(Math.random() * remainingPlayers.length);
+      const newAdmin = remainingPlayers[randomIndex];
+      const newRole =
+        newAdmin.role === 'spectator' ? 'admin-spectator' : 'admin-player';
+      newAdmin.role = newRole;
+    }
+
+    localStorage.setItem(`room:${room}:players`, JSON.stringify(remainingPlayers));
+    window.dispatchEvent(new Event('playersUpdated'));
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+  };
+}, [finalRoomName]); // ✅ DEPENDENCIA correcta
+
+useEffect(() => {
+  if (!revealed) {
+    const room = finalRoomName || 'default';
+    const raw = localStorage.getItem(`room:${room}:players`);
+    if (raw) {
+      const players = JSON.parse(raw);
+      const updatedPlayers = players.map((p: Player) => ({
+        ...p,
+        selectedCard: null,
+      }));
+      localStorage.setItem(`room:${room}:players`, JSON.stringify(updatedPlayers));
+      window.dispatchEvent(new Event('playersUpdated'));
+    }
+  }
+}, [revealed, finalRoomName]);
 
 
   return (
