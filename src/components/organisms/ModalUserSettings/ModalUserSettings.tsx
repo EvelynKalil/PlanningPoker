@@ -27,6 +27,7 @@ interface Player {
 }
 
 interface ModalUserSettingsProps {
+  
   currentRole: Role;
   onClose: () => void;
   onRoleChange: (newRole: Role) => void;
@@ -76,44 +77,50 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
   }, []);
 
   const handleSave = () => {
-    const roomName = localStorage.getItem('salaActual');
-    if (!roomName) return;
+  const roomName = localStorage.getItem('salaActual');
+  if (!roomName) return;
 
-    const raw = localStorage.getItem(`room:${roomName}:players`);
-    if (!raw) return;
+  const raw = localStorage.getItem(`room:${roomName}:players`);
+  if (!raw) return;
 
-    const parsedPlayers: Player[] = JSON.parse(raw);
+  const parsedPlayers: Player[] = JSON.parse(raw);
 
-    const updatedPlayers = parsedPlayers.map((player) => {
-      if (player.name === currentName) {
-        const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
-        const shouldKeepAdmin = !selectedAdmin;
-        const newRole = shouldKeepAdmin ? `admin-${baseRole}` : baseRole;
-        return { ...player, role: newRole };
-      }
+ const updatedPlayers = parsedPlayers.map((player) => {
+  if (player.name === currentName) {
+    const baseRole = selectedRole.includes('spectator') ? 'spectator' : 'player';
 
-      if (selectedAdmin && player.name === selectedAdmin) {
-        const isSpectator = player.role.includes('spectator');
-        return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
-      }
+    // ✅ Solo si era admin antes y no transfirió admin, puede conservar admin
+    const shouldKeepAdmin = currentRole.startsWith('admin') && !selectedAdmin;
+    const newRole = shouldKeepAdmin ? `admin-${baseRole}` : baseRole;
 
-      return player;
-    });
+    return { ...player, role: newRole };
+  }
 
-    localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
+  if (selectedAdmin && player.name === selectedAdmin) {
+    const isSpectator = player.role.includes('spectator');
+    return { ...player, role: isSpectator ? 'admin-spectator' : 'admin-player' };
+  }
 
-    const self = updatedPlayers.find((p) => p.name === currentName);
-    if (self) {
-      sessionStorage.setItem('playerRole', self.role);
-      sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
-      onRoleChange(self.role as Role);
-    }
+  return player;
+});
 
-    localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
-    window.dispatchEvent(new Event('playersUpdated'));
-    window.dispatchEvent(new Event('cardsUpdated'));
-    onClose();
-  };
+
+
+  localStorage.setItem(`room:${roomName}:players`, JSON.stringify(updatedPlayers));
+
+  const self = updatedPlayers.find((p) => p.name === currentName);
+  if (self) {
+    sessionStorage.setItem('playerRole', self.role);
+    sessionStorage.setItem('esAdmin', self.role.startsWith('admin') ? 'true' : 'false');
+    onRoleChange(self.role as Role);
+  }
+
+  localStorage.setItem(`room:${roomName}:cards`, JSON.stringify(cards));
+  window.dispatchEvent(new Event('playersUpdated'));
+  window.dispatchEvent(new Event('cardsUpdated'));
+  onClose();
+};
+
 
   const removeCard = (index: number) => {
     const updated = [...cards];
@@ -166,50 +173,48 @@ const addCard = () => {
   };
 
   const SortableCard = ({ id, index }: { id: string | number; index: number }) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-    } = useSortable({ id: id.toString() });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: id.toString() });
 
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    };
-
-    const handleRemove = (e: React.MouseEvent) => {
-      e.stopPropagation(); // 🔥 Detiene el arrastre
-      removeCard(index);
-    };
-
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        className="editable-card"
-      >
-        {id}
-        <span
-          className="delete-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeCard(index);
-          }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            e.preventDefault(); // 🔥 ¡Esto es la clave!
-          }}
-        >
-          ✖
-        </span>
-
-      </div>
-    );
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeCard(index);
+  };
+
+  return (
+    <div
+      data-testid={`card-${id}`}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="editable-card"
+    >
+      {id}
+      <span
+        className="delete-btn"
+        onClick={handleRemove}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
+        ✖
+      </span>
+    </div>
+  );
+};
+
 
   return (
     <div className="modal-backdrop">

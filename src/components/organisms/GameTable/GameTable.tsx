@@ -13,7 +13,7 @@ export interface Player {
   isNew?: boolean;
 }
 
-interface GameTableProps {
+export interface GameTableProps {
   currentPlayer: Player;
   otherPlayers: Player[];
   isAdmin: boolean;

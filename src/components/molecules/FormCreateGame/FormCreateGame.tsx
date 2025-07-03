@@ -53,6 +53,7 @@ const FormCreateGame = () => {
     <form className="form-create-game" onSubmit={handleSubmit}>
       <label htmlFor="gameName">Nombra la partida</label>
       <InputText
+        id = "gameName"
         value={name}
         onChange={handleChange}
         isInvalid={errors.length > 0}
@@ -65,11 +66,7 @@ const FormCreateGame = () => {
         </ul>
       )}
       <div className="button-wrapper">
-        <Button
-          type="submit"
-          onClick={() => { }}
-          disabled={!isValid}
-        >
+        <Button type="submit" disabled={!isValid}>
           Crear partida
         </Button>
       </div>
