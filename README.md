@@ -1,84 +1,190 @@
 # Planning Poker – React Challenge
 
-**Planning Poker** is a collaborative React app designed to facilitate agile estimation sessions using the planning poker technique.  
-Built with best frontend practices, atomic design principles, and accessibility in mind.
+**Planning Poker** es una aplicación colaborativa construida con React, diseñada para facilitar sesiones de estimación ágiles utilizando la técnica de planning poker.  
+Se desarrolló siguiendo buenas prácticas de frontend, el principio de diseño atómico y teniendo en cuenta la accesibilidad.
 
 ---
 
-## Live Demo
+## Tabla de Contenidos
 
-*(Coming soon…)*
+- [Demo en Vivo](#demo-en-vivo)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Tecnologías Usadas](#tecnologías-usadas)
+- [Instalación](#instalación)
+- [Uso](#uso)
+- [Características](#características)
+- [Configuración](#configuración)
+- [Dependencias](#dependencias)
+- [Contribuyentes](#contribuyentes)
 
 ---
 
-## Project Structure (Atomic Design)
+## Demo en Vivo
+
+**Próximamente…**
+
+---
+
+## Estructura del Proyecto
+
+Organizado con el patrón de **Atomic Design**:
 
 ```
-src/
-├── components/
-│   ├── atoms/
-│   ├── molecules/
-│   ├── organisms/
-│   ├── templates/
-│   └── pages/
-├── assets/
-├── main.jsx
-└── index.css
+├── PlanningPoker/
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── README.md
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── src/
+│   │   ├── custom.d.ts
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   ├── assets/
+│   │   │   ├── Logo.png
+│   │   │   ├── LogoPragma.png
+│   │   ├── components/
+│   │   │   ├── atoms/
+│   │   │   │   ├── Button/
+│   │   │   │   ├── InputText/
+│   │   │   │   ├── RadioButton/
+│   │   │   │   ├── SelectInput/
+│   │   │   │   ├── SpinnerCounting/
+│   │   │   ├── molecules/
+│   │   │   │   ├── FormCreateGame/
+│   │   │   ├── organisms/
+│   │   │   │   ├── GameTable/
+│   │   │   │   ├── InviteModal/
+│   │   │   │   ├── ModalPlayer/
+│   │   │   │   ├── ModalUserSettings/
+│   │   │   │   ├── VotingResults/
+│   │   │   ├── templates/
+│   │   │   │   ├── SplashScreen/
+│   │   │   ├── pages/
+│   │   │   │   ├── App.tsx
+│   │   │   │   ├── SalaPage.tsx
+│   ├── hooks/
+│   │   ├── usePlayers.ts
+│   ├── store/
+│   │   ├── index.ts
+│   │   ├── userSlice.ts
+│   ├── tests/
+│   │   ├── App.test.tsx
+│   │   ├── Button.test.tsx
+│   │   ├── FormCreateGame.test.tsx
+│   │   ├── GameTable.test.tsx
+│   │   ├── InputText.test.tsx
+│   │   ├── InviteModal.test.tsx
+│   │   ├── ModalPlayer.test.tsx
+│   │   ├── ModalUserSettings.test.tsx
+│   │   ├── RadioButton.test.tsx
+│   │   │   ├── reorderCards.test.tsx
+│   │   │   ├── SalaPage.test.tsx
+│   │   │   ├── SelectInput.test.tsx
+│   │   │   ├── session.test.ts
+│   │   │   ├── setupTest.ts
+│   │   │   ├── SpinnerCounting.test.tsx
+│   │   │   ├── SplashScreen.test.tsx
+│   │   │   ├── store.test.ts
+│   │   │   ├── usePlayers.test.ts
+│   │   │   ├── userSlice.test.ts
+│   │   │   ├── VotingResults.test.tsx
+│   │   ├── utils/
+│   │   │   ├── cards.ts
+│   │   │   ├── session.tsx
+
+
 ```
 
 ---
 
-## Technologies Used
+## Tecnologías Usadas
 
-- React
-- Pure CSS styling
-- Atomic Design pattern
-- ESLint (recommended setup)
-- `localStorage` for data persistence
+- **React** – Librería principal para construir la UI
+- **React Router DOM** – Enrutamiento para SPAs
+- **Redux Toolkit** – Manejo de estado global
+- **React Redux** – Enlace entre Redux y React
+- **@dnd-kit** – Utilidades para funcionalidades de arrastrar y soltar
+- **Vite** – Bundler moderno para desarrollo rápido
+- **TypeScript** – Tipado estático sobre JavaScript
+- **CSS puro** – Estilización sin frameworks
+- **ESLint** – Linter para mantener el código limpio
+- **Vitest** – Framework de pruebas moderno y rápido
+- **Jest** – Herramienta de pruebas
+- **Testing Library** – Utilidades para pruebas accesibles (DOM, React, User Events)
+- **jsdom** – Emulación del DOM para entornos de test
 
 ---
 
-## Installation & Usage
+## Instalación
 
-1. Clone the repo:
+1. Clona el repositorio:
+
 ```bash
 git clone https://github.com/your-username/planning-poker-react.git
 ```
 
-2. Install dependencies:
+2. Instala las dependencias:
+
 ```bash
 npm install
 ```
 
-3. Run the development server:
+- ver dependencias 
+
+```bash
+npm list
+```
+
+3. Ejecuta el servidor de desarrollo:
+
 ```bash
 npm run dev
 ```
 
-4. Open your browser at:  
+4. Abre tu navegador en:  
    [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## Features
+## Características
 
-- Create a game with intelligent name validation
-- Specific validation rules for name input
-- Game name saved to `localStorage`
-- Responsive layout matching Figma design
-- Modular, maintainable architecture
-
----
-
-## In Progress
-
-- [ ] Create administrator user
-- [ ] Voting room view
-- [ ] Card selection and scoring
-- [ ] Invite players via link
+- Crear una sala de juego con interfaz amigable
+- Estimación colaborativa en tiempo real (local)
+- Interfaz modular y reutilizable
+- Persistencia de datos con `localStorage`
+- Arquitectura basada en Atomic Design
 
 ---
 
-## Author
+## Configuración
 
-Built by **Evelyn Rendón** for Pragma
+No se requiere configuración adicional. Las dependencias y scripts se gestionan con `npm`.
+
+---
+
+## Dependencias
+
+Listado parcial desde `package.json`:
+
+- `react`
+- `react-dom`
+- `vite`
+- `eslint`
+
+(Ejecuta `npm list` para ver todas las dependencias.)
+
+---
+
+## Contribuyentes
+
+- *Evelyn Rendón Kalil para Pragma*
+
+---
+
+## Licencia
+
+**Este proyecto no utiliza una licencia específica.**
