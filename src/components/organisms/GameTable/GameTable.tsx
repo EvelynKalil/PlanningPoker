@@ -72,7 +72,7 @@ const GameTable: React.FC<GameTableProps> = ({
     setRevealed(false);
     localStorage.setItem('revealed', 'false');
 
-    const roomName = localStorage.getItem('salaActual') || 'default';
+    const roomName = (localStorage.getItem('salaActual') || 'default').toLowerCase();
     const raw = localStorage.getItem(`room:${roomName}:players`);
     if (raw) {
       const players = JSON.parse(raw);
