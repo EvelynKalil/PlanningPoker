@@ -1,6 +1,7 @@
 import React from 'react';
 import './InputText.css';
 
+// props estándar de un <input> HTML
 type InputTextProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isInvalid?: boolean;
 };

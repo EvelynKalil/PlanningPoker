@@ -12,13 +12,13 @@ interface VotingResultsProps {
 }
 
 const VotingResults: React.FC<VotingResultsProps> = ({ players }) => {
-  // 🔹 Filtramos los jugadores que no son nuevos
+  // Filtramos los jugadores que no son nuevos
   const activePlayers = players.filter(p => !p.isNew);
 
-  // 🔹 Extraemos las cartas seleccionadas
+  // Extraemos las cartas seleccionadas
   const selectedCards = activePlayers.map(p => p.selectedCard);
 
-  // 🔸 Promedio solo con números
+  // Promedio solo con números
   const numericVotes = selectedCards.filter(
     (card): card is number => typeof card === 'number'
   );
@@ -31,13 +31,13 @@ const VotingResults: React.FC<VotingResultsProps> = ({ players }) => {
         ).toFixed(1)
       : '0';
 
-  // 🧮 Contamos los votos numéricos
+  // Contamos los votos numéricos
   const numericVoteMap = new Map<number, number>();
   numericVotes.forEach(card => {
     numericVoteMap.set(card, (numericVoteMap.get(card) || 0) + 1);
   });
 
-  // 🤖 Contamos los votos no numéricos (emojis, letras...)
+  // Contamos los votos no numéricos (emojis, letras...)
   const nonNumericVotes = selectedCards.filter(
     (card): card is string =>
       typeof card === 'string' && card.trim().length > 0
@@ -52,7 +52,7 @@ const VotingResults: React.FC<VotingResultsProps> = ({ players }) => {
     <div className="voting-results-wrapper">
       <div className="result-cards">
 
-        {/* 🔢 Mostrar resultados numéricos */}
+        {/* Mostrar resultados numéricos */}
         {[...numericVoteMap.entries()]
           .sort((a, b) => a[0] - b[0])
           .map(([value, count]) => (
@@ -62,7 +62,7 @@ const VotingResults: React.FC<VotingResultsProps> = ({ players }) => {
             </div>
           ))}
 
-        {/* 😄 Mostrar resultados no numéricos */}
+        {/* Mostrar resultados no numéricos */}
         {[...nonNumericVoteMap.entries()].map(([value, count]) => (
           <div key={value} className="result-card">
             <div className="carta">{value}</div>
@@ -72,7 +72,7 @@ const VotingResults: React.FC<VotingResultsProps> = ({ players }) => {
 
       </div>
 
-      {/* 📊 Mostrar promedio */}
+      {/* Mostrar promedio */}
       <div className="average-box">
         <span>Promedio:</span>
         <strong>{promedio}</strong>

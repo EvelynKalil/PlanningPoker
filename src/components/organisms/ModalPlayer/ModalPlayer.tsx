@@ -4,16 +4,21 @@ import RadioButton from '../../atoms/RadioButton/RadioButton';
 import Button from '../../atoms/Button/Button';
 import './ModalPlayer.css';
 
+//Definición de las propiedades del componente
 type ModalPlayerProps = {
   onSubmit: (name: string, role: 'player' | 'spectator') => void;
 };
 
+// Definición del componente como función flecha con props tipadas
 const ModalPlayer = ({ onSubmit }: ModalPlayerProps) => {
+
+  // Hooks de estados locales:
   const [name, setName] = useState('');
   const [role, setRole] = useState<'player' | 'spectator' | ''>('');
   const [errors, setErrors] = useState<string[]>([]);
   const [isValid, setIsValid] = useState(false);
 
+  //validaciones
   const validate = (text: string): string[] => {
     const errs: string[] = [];
     if (text.length < 5 || text.length > 20) {
@@ -32,6 +37,7 @@ const ModalPlayer = ({ onSubmit }: ModalPlayerProps) => {
     return errs;
   };
 
+   // Recalcula errores y valida cada vez que cambie el nombre o el rol
   const recomputeValidity = (text: string, selectedRole: string) => {
     const valErrors = validate(text);
     setErrors(valErrors);
@@ -39,11 +45,12 @@ const ModalPlayer = ({ onSubmit }: ModalPlayerProps) => {
     setIsValid(isFormValid);
   };
 
+  // Handlers de cambio
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    setName(newName);
-    recomputeValidity(newName, role);
-  };
+  const newName = e.target.value;      // Captura el texto que el usuario acaba de escribir
+  setName(newName);                    // Actualiza el estado `name` con ese texto
+  recomputeValidity(newName, role);    // Vuelve a validar el formulario con el nuevo nombre y el rol actual
+};
 
   const handleRoleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedRole = e.target.value as 'player' | 'spectator';
@@ -51,11 +58,14 @@ const ModalPlayer = ({ onSubmit }: ModalPlayerProps) => {
     recomputeValidity(name, selectedRole);
   };
 
+  //Función que se ejecuta al enviar el formulario
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    // Guarda en sessionStorage nombre y rol en la sala si es valido.
     if (isValid && (role === 'player' || role === 'spectator')) {
       sessionStorage.setItem('playerName', name);
       sessionStorage.setItem('playerRole', role);
+      // Avisa al padre (SalaPage) que ya existe nombre y rol
       onSubmit(name, role);
     }
   };
