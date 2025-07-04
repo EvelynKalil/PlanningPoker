@@ -56,12 +56,12 @@ const SalaPage = () => {
 
   useEffect(() => {
     if (roomName) {
-      const currentRoom = localStorage.getItem('salaActual');
+      const currentRoom = localStorage.getItem('salaActual')?.toLowerCase();
 
-      if (!currentRoom || currentRoom !== roomName) {
-        localStorage.setItem('salaActual', roomName);
+      if (!currentRoom || currentRoom !== finalRoomName) {
+        localStorage.setItem('salaActual', finalRoomName);
 
-        const playersKey = `room:${roomName}:players`;
+        const playersKey = `room:${finalRoomName}:players`;
         const existingPlayers = localStorage.getItem(playersKey);
 
         if (!existingPlayers) {
@@ -208,14 +208,14 @@ useEffect(() => {
   const [cards, setCards] = useState<(string | number)[]>([]);
 
   useEffect(() => {
-    const room = localStorage.getItem("salaActual") || "default";
+    const room = (localStorage.getItem("salaActual") || "default").toLowerCase();
     const raw = localStorage.getItem(`room:${room}:cards`);
     setCards(raw ? JSON.parse(raw) : [0, 1, 3, 5, 8, 13, 21, 34, 55, 89, "?", "☕"]);
   }, []);
 
   useEffect(() => {
     const handleCardsUpdated = () => {
-      const room = localStorage.getItem("salaActual") || "default";
+      const room = (localStorage.getItem("salaActual") || "default").toLowerCase();
       const raw = localStorage.getItem(`room:${room}:cards`);
       setCards(raw ? JSON.parse(raw) : []);
     };

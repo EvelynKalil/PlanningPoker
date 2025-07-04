@@ -52,7 +52,7 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
     const { name } = getCurrentSessionPlayer();
     setCurrentName(name);
 
-    const roomName = localStorage.getItem('salaActual') || 'default';
+    const roomName = (localStorage.getItem('salaActual') || 'default').toLowerCase();
     const raw = localStorage.getItem(`room:${roomName}:players`);
     if (raw) {
       const parsedPlayers: Player[] = JSON.parse(raw);
@@ -71,13 +71,13 @@ const ModalUserSettings: React.FC<ModalUserSettingsProps> = ({
   }, []);
 
   useEffect(() => {
-    const room = localStorage.getItem('salaActual') || 'default';
+    const room = (localStorage.getItem('salaActual') || 'default').toLowerCase();
     const raw = localStorage.getItem(`room:${room}:cards`);
     setCards(raw ? JSON.parse(raw) : [0, 1, 3, 5, 8, 13, 21, 34, 55, 89, '?', '☕']);
   }, []);
 
   const handleSave = () => {
-  const roomName = localStorage.getItem('salaActual');
+  const roomName = (localStorage.getItem('salaActual') || 'default').toLowerCase();
   if (!roomName) return;
 
   const raw = localStorage.getItem(`room:${roomName}:players`);
