@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { vi } from 'vitest' // 👈 IMPORTANTE
-import Button from '../components/atoms/Button/Button' // ✅ Ajusta el path si está mal
+import { vi } from 'vitest' // IMPORTANTE
+import Button from '../components/atoms/Button/Button'
 
 describe('Button', () => {
   it('muestra el texto correctamente', () => {

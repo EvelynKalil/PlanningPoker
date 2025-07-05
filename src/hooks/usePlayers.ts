@@ -31,7 +31,7 @@ export const usePlayers = (roomName: string) => {
 
   // useEffect para sincronizar estado al montar y luego de cambios
   useEffect(() => {
-    readPlayersFromStorage(); // ⏱ lee al montar
+    readPlayersFromStorage(); //lee al montar
 
     const interval = setInterval(readPlayersFromStorage, 500);
 
