@@ -42,9 +42,7 @@ const SalaPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const isInvited = queryParams.get('invited') === 'true';
 
-  // ────────────────────────────────────────────────────────────────────────────────
-  // Sincroniza el estado "revealed" (cartas reveladas) entre pestañas y cuando
-  // se dispara el evento personalizado "playersUpdated".
+  // Sincroniza el estado "revealed" (cartas reveladas) entre pestañas y cuando  se dispara el evento personalizado "playersUpdated".
   useEffect(() => {
      // Función que lee localStorage y actualiza el estado local "revealed"
     const syncReveal = () => {
@@ -61,8 +59,7 @@ const SalaPage = () => {
     };
   }, []);
 
-  //si el user viene con la querystring "?invited=true", significa que es invitado y Limpiamos 
-  // sessionStorage para se vuelva a registrar (modal de usuario).
+  //si el user viene con la querystring "?invited=true", significa que es invitado y Limpiamos sessionStorage para se vuelva a registrar (modal de usuario).
   useEffect(() => {
     if (isInvited) {
       sessionStorage.clear();
@@ -71,10 +68,6 @@ const SalaPage = () => {
 
   
   //  Inicialización de la sala en localStorage cuando cambia de "roomName":
-  //    - Guarda "salaActual" para saber en qué sala está.
-  //    - Si es la primera vez en esta sala, crea la clave "room:<roomName>:players"
-  //      y marca al usuario de esta pestaña como admin.
-  //    - Si ya había salaActual igual, marca "esAdmin" a false.
   useEffect(() => {
     if (roomName) {
       const currentRoom = localStorage.getItem('salaActual')?.toLowerCase();
@@ -100,8 +93,7 @@ const SalaPage = () => {
   //Mostrar el modal de registro 
   useEffect(() => {
     const { name, role, id } = getCurrentSessionPlayer();
-  // Si no hay datos de sesión o ese nombre no está en la lista,
-  // abrimos el modal para que el usuario se registre.
+  // Si no hay datos de sesión o ese nombre no está en la lista, abrimos el modal para que el usuario se registre.
     if (!name || !role || !id || !playerExists(name)) {
       setShowModal(true);
     } else {

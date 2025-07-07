@@ -1,3 +1,4 @@
+/* Wrapper general */
 .game-table-wrapper {
   display: flex;
   justify-content: center;
@@ -5,6 +6,7 @@
   margin-top: 150px;
 }
 
+/* Contenedor principal de la mesa */
 .game-table {
   position: relative;
   width: 50vw;
@@ -15,19 +17,18 @@
   box-shadow: 0 0 12px rgba(185, 104, 255, 0.3);
 }
 
-
+/* Aros interiores de la mesa */
 .table-middle {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 94%;  /* Tamaño entre el 100% del padre y el 94% del interior */
-  height: 87%; /* Tamaño entre el 100% del padre y el 87% del interior */
+  width: 94%;
+  height: 87%;
   border-radius: 999px;
-  border: 2px solid #9479e8; 
+  border: 2px solid #9479e8;
   box-shadow: 0 0 11px rgba(185, 104, 255, 0.25);
 }
-
 
 .table-inner {
   position: absolute;
@@ -42,8 +43,7 @@
   box-shadow: 0 0 10px rgba(185, 104, 255, 0.2);
 }
 
-
-
+/* Slots de jugadores */
 .player-slot {
   position: absolute;
   display: flex;
@@ -51,58 +51,20 @@
   align-items: center;
   text-align: center;
   z-index: 3;
-  transform: translate(-50%, -50%) translateY(-30px); /* Empuja hacia afuera */
+  transform: translate(-50%, -50%) translateY(-30px);
 }
 
-/* Slots fijos alrededor de la mesa (0–7), 4 siempre es el jugador */
-.slot-0 { 
-  top: -15%;     
-  left: 50%; 
-  transform: translate(-50%, -50%); 
-}
+/* Posiciones fijas (pantalla grande) */
+.slot-0 { top: -15%; left: 50%; transform: translate(-50%, -50%); }
+.slot-1 { top: -15%; left: 78%; transform: translate(-50%, -50%); }
+.slot-2 { top: 50%; left: 110%; transform: translate(-50%, -50%); }
+.slot-3 { top: 125%; left: 78%; transform: translate(-50%, -50%); }
+.slot-4 { bottom: -25%; left: 50%; transform: translate(-50%, 50%); }
+.slot-5 { top: 125%; left: 23%; transform: translate(-50%, -50%); }
+.slot-6 { top: 50%; left: -10%; transform: translate(-50%, -50%); }
+.slot-7 { top: -15%; left: 23%; transform: translate(-50%, -50%); }
 
-.slot-1 { 
-  top: -15%;      
-  left: 78%;     
-  transform: translate(-50%, -50%); 
-}
-
-.slot-2 { 
-  top: 50%; 
-  left: 110%;   
-  transform: translate(-50%, -50%); 
-}
-
-.slot-3 { 
-  top: 125%;     
-  left: 78%; 
-  transform: translate(-50%, -50%); 
-}
-
-.slot-4 { 
-  bottom: -25%;  
-  left: 50%; 
-  transform: translate(-50%, 50%); 
-}
-
-.slot-5 { 
-  top: 125%;     
-  left: 23%;      
-  transform: translate(-50%, -50%); 
-}
-
-.slot-6 { 
-  top: 50%; 
-  left: -10%;    
-  transform: translate(-50%, -50%); 
-}
-
-.slot-7 { 
-  top: -15%;      
-  left: 23%; 
-  transform: translate(-50%, -50%); 
-}
-
+/* Cartas volteadas */
 .carta-volteada {
   width: 40px;
   height: 60px;
@@ -133,6 +95,13 @@
   box-shadow: 0 0 6px 1px #c084fc;
 }
 
+.carta--espectador {
+  background-color: #ccc;
+  border: 2px dashed #999;
+  color: #555;
+}
+
+/* Botón central (Revelar cartas) */
 .btn-reveal {
   position: absolute;
   top: 45%;
@@ -150,6 +119,7 @@
   z-index: 4;
 }
 
+/* Spinner */
 .spinner {
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-top: 3px solid #fff;
@@ -166,12 +136,7 @@
   }
 }
 
-.carta--espectador {
-  background-color: #ccc;
-  border: 2px dashed #999;
-  color: #555;
-}
-
+/* Indicador de carga */
 .loading-wrapper {
   padding: 12px 24px;
   background-color: #2e0669;
@@ -181,3 +146,32 @@
   align-items: center;
   margin-top: 5%;
 }
+
+@media screen and (max-width: 1000px) {
+  .game-table {
+    width: 90vw;
+    max-width: 300px;
+  }
+
+  .slot-0 { top: -35%; left: 50%; }
+  .slot-1 { top: -30%; left: 85%; }
+  .slot-2 { top: 50%; left: 110%; }
+  .slot-3 { top: 140%; left: 85%; }
+  .slot-4 { bottom: -50%; left: 50%; transform: translate(-50%, 50%); }
+  .slot-5 { top: 140%; left: 15%; }
+  .slot-6 { top: 50%; left: -10%; }
+  .slot-7 { top: -30%; left: 15%; }
+
+  .carta-volteada {
+    width: 32px;
+    height: 48px;
+    font-size: 0.8rem;
+  }
+
+  .carta-volteada span {
+    font-size: 0.8rem;
+  }
+}
+
+
+ 

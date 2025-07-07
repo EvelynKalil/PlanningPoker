@@ -124,7 +124,7 @@ Organizado con el patrón de **Atomic Design**:
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/your-username/planning-poker-react.git
+git clone https://github.com/EvelynKalil/PlanningPoker
 ```
 
 2. Instala las dependencias:
@@ -155,7 +155,7 @@ npm run dev
 - Crear una sala de juego con interfaz amigable
 - Estimación colaborativa en tiempo real (local)
 - Interfaz modular y reutilizable
-- Persistencia de datos con `localStorage`
+- Persistencia de datos con `SessionStorage`
 - Arquitectura basada en Atomic Design
 
 ---
